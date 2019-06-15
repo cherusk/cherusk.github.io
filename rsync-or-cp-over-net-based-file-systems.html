@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <title>cherusk Tech Blog</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/style.css' type="text/css" media="all" />
+    <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/highlight.css' type="text/css" media="all" />
+    <link href="https://cherusk.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="cherusk Tech Blog Full Atom Feed" />
+    
+</head>
+
+<body id="index" class="blog">
+<div id="container" class="hfeed">
+    <header id="header" >
+        <div id="logo">
+            <h1><img src="https://cherusk.github.io//meta/cherusk.png" width="500" height="300" alt="小铱的故事" />
+                cherusk Tech Blog</h1>
+        </div> <!-- /#logo-->
+        <nav id="menu" class="main-nav"><ul class="menu">
+            <li  class="active"><a href="https://cherusk.github.io/pages/about.html">About</a></li>
+
+        </ul></nav><!-- /#menu -->
+    </header>
+    <section id="wrapper" class="clearfix">
+        <section id="content" class="grid col-620" >
+                <section class="breadcrumb-list">
+<a href="https://cherusk.github.io">Blog</a> ›<a href="category/lnx-systems-engineering.html">LNX Systems Engineering</a> ›rsync or cp over net based file systems
+                </section>
+
+
+<section id="post" class="post hentry">
+    <header>
+    <h2 class="post-title" >rsync or cp over net based file systems</h2>
+    
+    <div class="post-meta">
+        <span class="meta-prep">Post in</span>
+        <abbr class="date" title="2016-08-16T01:00:00+00:00"> 
+            <a href="https://cherusk.github.io/archive/2016/Aug/index.html">Tue 16 August 2016 </a>
+        </abbr>
+        <span class="meta-prep"> |Tags</span>
+                <a href="https://cherusk.github.io/tag/comparison.html">comparison</a>
+                <a href="https://cherusk.github.io/tag/cp.html">cp</a>
+                <a href="https://cherusk.github.io/tag/data-migration.html">data migration</a>
+                <a href="https://cherusk.github.io/tag/genbackupdata.html">genbackupdata</a>
+                <a href="https://cherusk.github.io/tag/ibvirt.html">ibvirt</a>
+                <a href="https://cherusk.github.io/tag/kvmqemu.html">KVM/Qemu</a>
+                <a href="https://cherusk.github.io/tag/linux.html">linux</a>
+                <a href="https://cherusk.github.io/tag/networking.html">networking</a>
+                <a href="https://cherusk.github.io/tag/nfs.html">nfs</a>
+                <a href="https://cherusk.github.io/tag/performance.html">performance</a>
+                <a href="https://cherusk.github.io/tag/rsync.html">rsync</a>
+                <a href="https://cherusk.github.io/tag/virt-builder.html">virt-builder</a>
+                <a href="https://cherusk.github.io/tag/vs.html">vs</a>
+        <!-- TOBE COMMENTS -->
+    </div>
+    </header>
+    <div class="post-entry">
+        <h1>Question</h1>
+<p>Skimming the net with all thinkable efforts I could find some passionately led discussions and interesting articles about cp and rsync performance comparisons. Foremost <a href="https://lwn.net/Articles/400489/">LWN-CP-RSYNC</a> raised my attention for it promising in a technically perfect manner a more than doubling of throughput when opting for coreutils' cp in default local data migration setups instead for rsync.  For me being a Data Centre engineer,  I was wondering if cp would still outperform rsync when data is to be beamed over non-local, net based file systems. Although being vividly discussed, I could not find any recent and reliabe data to that topic online. I expected the for the local migration measured  findings to hold for net based file systems because of the minimalistic data pushing facilities of cp and the a little more complex architecture and algorithms of rsync. I did not consider cat or cpio here since both seem to show the more or less same performance level as cp.</p>
+<h1>Setup</h1>
+<p>I chose a minimal but still lifelike enough setup to compare the two tools. All components were based on <a href="http://www.linux-kvm.org/page/Main_Page">KVM/Qemu</a>  were controlled and run with <a href="http://wiki.libvirt.org/page/Main_Page">libvirt</a> mechanism, especially virsh. I won't go into detail about that is done as the respective docs are more exhaustive on that as I could. What I want to point out here is <a href="http://libguestfs.org/virt-builder.1.html">virt-builder</a> of the libguestfs package which made creating the VMs quite comfortable and quick.</p>
+<p><img alt="setup" class="alignnone size-full wp-image-69" height="883" src="https://cherusk.github.io/2016/08/setup.png" width="2132"></p>
+<p>Mainly, I opted for NFS as a network based FS as it is open and quickly and with ease to configure. Moreover, it's still quite widespread in data centres as well.</p>
+<p>Basically, the two opensuse 42.1 based VMs were the NFS serving machines. The fedora24 Server Version VM had the NFS client data pushing role. Fedora ran on kernel 4.5.7-300.fc24.x86_64, the suse ones on 4.1.12-1-default. All machines had 2024 MB phys. RAM and 1 phys. Processor.</p>
+<p>The virsh brought up and not manually tweakd virtual net I tested with:</p>
+<hr>
+<p><strong>[root@suse42_n1 \~]# iperf3 -s</strong></p>
+<p><strong>[root@fedora24 \~]# iperf3 -c suse42_n1</strong></p>
+<p><strong>[...]</strong></p>
+<p><strong>- - - - - - - - - - - - - - - - - - - - - - - - -</strong></p>
+<p><strong>[ ID] Interval Transfer Bandwidth Retr</strong></p>
+<p><strong>[ 4] 0.00-10.00 sec 2.78 GBytes 2.39 Gbits/sec 15859 sender</strong></p>
+<p><strong>[ 4] 0.00-10.00 sec 2.78 GBytes 2.39 Gbits/sec receiver</strong></p>
+<hr>
+<p>So not the fastest connection one seen in data centres but representative enough for the comparison.</p>
+<p>The data source and sinks were <strong>5GB</strong> large Virtio-Disks with BTRFS on them. Going for BTRFS was quite arbitrary since the local backend FS was not of to much of avail for the comparison.</p>
+<p>The mounts:</p>
+<hr>
+<p><strong>[root@fedora24 \~]# nfsstat -m</strong><br>
+<strong>/source from suse42_n1:/source</strong><br>
+<strong>Flags: rw,relatime,vers=4.2,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,port=0,</strong></p>
+<p><strong>timeo=600,retrans=2,sec=sys,clientaddr=192.168.122.89,local_lock=none,addr=192.168.122.158</strong></p>
+<p><strong>/sink from suse42_n2:/sink</strong><br>
+<strong>Flags: rw,relatime,vers=4.2,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,port=0,</strong></p>
+<p><strong>timeo=600,retrans=2,sec=sysclientaddr,=192.168.122.89,local_lock=none,addr=192.168.122.52</strong></p>
+<hr>
+<h1>Approach</h1>
+<p>All the action was on the fedora24 node for it being the data pushing entity. I decided to have several runs with different data constellations in /source. <a href="http://linux.die.net/man/1/genbackupdata">genbackupdata</a> was my tool of choice for data generation although not fully working. It promises files with distributed shape, but it can produce files only uniformly. Its <strong>--delete</strong>, <strong>--rename</strong>, or <strong>--modify</strong> flags were somehow not implemented. Still, a good choice to create random data.</p>
+<p>I went for 6 runs and generated for each.</p>
+<hr>
+<p><strong>genbackupdata --create=SIZE [--chunk-size=C_SIZE] [--file-size=F_SIZE] --depth=3 /source/</strong></p>
+<table class="tg">
+<tbody>
+<tr>
+<th class="tg-9hbo">
+SIZE
+
+</th>
+<th class="tg-9hbo">
+C\_SIZE
+
+</th>
+<th class="tg-9hbo">
+F\_SIZE
+
+</th>
+<th class="tg-9hbo">
+Gen. Files
+
+</th>
+</tr>
+<tr>
+<td class="tg-baqh" rowspan="3">
+100M
+
+</td>
+<td class="tg-baqh">
+-
+
+</td>
+<td class="tg-baqh">
+-
+
+</td>
+<td class="tg-baqh">
+2M
+
+</td>
+</tr>
+<tr>
+<td class="tg-baqh">
+80000
+
+</td>
+<td class="tg-baqh">
+80000
+
+</td>
+<td class="tg-baqh">
+10M
+
+</td>
+</tr>
+<tr>
+<td class="tg-baqh">
+160000
+
+</td>
+<td class="tg-baqh">
+160000
+
+</td>
+<td class="tg-baqh">
+20M
+
+</td>
+</tr>
+<tr>
+<td class="tg-baqh" rowspan="3">
+500M
+
+</td>
+<td class="tg-baqh">
+-
+
+</td>
+<td class="tg-baqh">
+-
+
+</td>
+<td class="tg-baqh">
+2M
+
+</td>
+</tr>
+<tr>
+<td class="tg-baqh">
+80000
+
+</td>
+<td class="tg-baqh">
+80000
+
+</td>
+<td class="tg-baqh">
+10M
+
+</td>
+</tr>
+<tr>
+<td class="tg-baqh">
+160000
+
+</td>
+<td class="tg-baqh">
+160000
+
+</td>
+<td class="tg-baqh">
+20M
+
+</td>
+</tr>
+</tbody>
+</table>
+
+<p>For instance for <strong>genbackupdata --create=100M</strong> we get:</p>
+<p><strong>matthias@suse42_n1:\~&gt; du -h /source/</strong><br>
+<strong>2,1M    /source/0/0/0/0/0</strong><br>
+<strong>2,0M    /source/0/0/0/0/1</strong><br>
+<strong>2,1M    /source/0/0/0/0/6</strong><br>
+<strong>2,1M    /source/0/0/0/0/2</strong><br>
+<strong>[...]</strong><br>
+<strong>17M    /source/0/0/0</strong><br>
+<strong>17M    /source/0/0</strong><br>
+<strong>17M    /source/0</strong><br>
+<strong>100M    /source/</strong></p>
+<hr>
+<p>Before every run I diligently cleaned up all the caches:</p>
+<hr>
+<p><strong>echo 1 &gt; /proc/sys/vm/drop_caches</strong><br>
+<strong>echo 2 &gt; /proc/sys/vm/drop_caches</strong><br>
+<strong>echo 3 &gt; /proc/sys/vm/drop_caches</strong><br>
+<strong>swapoff -a</strong><br>
+<strong>sync</strong></p>
+<hr>
+<p>I tracked every run:</p>
+<hr>
+<p><strong>time -a -o measurem -f "real %e user %U sys %S avg-io-pg-fault %F fs-in %I fs-out %O avg-mem %K max-resident %M avg-res %t cpu %P% "</strong></p>
+<hr>
+<p>The CMD itself and intermediate steps abstractly:</p>
+<ol>
+<li>run copy</li>
+<li>pollute source to make delta sync necessary</li>
+<li>run sync</li>
+<li>cleanup /sink</li>
+</ol>
+<p>and  in practice then:</p>
+<hr>
+<ul>
+<li>RSYNC:<ol>
+<li><strong>rsync -aHv --no-whole-file --progress /source/ /sink</strong></li>
+<li><strong>find <a href="///etc/"><span style="color:#3465a4;">/etc/</span></a> -type f | sort -R input | head -n 50 | xargs echo "`head -c 20 <a href="///dev/urandom%60%22"><span style="color:#3465a4;">/dev/urandom`"</span></a> &gt;&gt; {}</strong></li>
+<li><strong>rsync -aHv --no-whole-file --progress /source/ /sink</strong></li>
+<li><strong>rm -r /sink/*</strong></li>
+</ol>
+</li>
+<li>CP<strong>:</strong><ol>
+<li><strong>cp -au /source/cp -au /source/* /sink/* /sink/</strong></li>
+<li><strong>find <a href="///etc/"><span style="color:#3465a4;">/etc/</span></a> -type f | sort -R input | head -n 50 | xargs echo "`head -c 20 <a href="///dev/urandom%60%22"><span style="color:#3465a4;">/dev/urandom`"</span></a> &gt;&gt; {}</strong></li>
+<li><strong>rsync -aHv --no-whole-file --progress /source/ /sink</strong></li>
+<li><strong>rm -r /sink/*</strong></li>
+</ol>
+</li>
+</ul>
+<hr>
+<h1>Outcome</h1>
+<p>The table does not show CPU usage, since that was for all runs <strong>&lt;5%</strong> for cp and <strong>near 20 %</strong> for rsync. Therefore, the net was mainly the bottleneck, as expected.</p>
+<table class="tg">
+<tbody>
+<tr>
+<th class="tg-031e">
+Data Mass
+
+</th>
+<th class="tg-yw4l">
+Filesize
+
+</th>
+<th class="tg-yw4l">
+Tool
+
+</th>
+<th class="tg-031e">
+Elapsed
+
+</th>
+<th class="tg-031e">
+Sys
+
+</th>
+<th class="tg-031e">
+User
+
+</th>
+</tr>
+<tr>
+<td class="tg-031e" rowspan="12">
+100M
+
+</td>
+<td class="tg-kjho" rowspan="4">
+2M
+
+</td>
+<td class="tg-yzt1" rowspan="2">
+RSYNC
+
+</td>
+<td class="tg-031e">
+229.15
+
+</td>
+<td class="tg-031e">
+2.91
+
+</td>
+<td class="tg-031e">
+0.80
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+1.34
+
+</td>
+<td class="tg-yw4l">
+0.20
+
+</td>
+<td class="tg-yw4l">
+0.02
+
+</td>
+</tr>
+<tr>
+<td class="tg-d1kj" rowspan="2">
+CP
+
+</td>
+<td class="tg-yw4l">
+272.85
+
+</td>
+<td class="tg-yw4l">
+1.86
+
+</td>
+<td class="tg-yw4l">
+0.26
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+1.72
+
+</td>
+<td class="tg-yw4l">
+0.25
+
+</td>
+<td class="tg-yw4l">
+0.02
+
+</td>
+</tr>
+<tr>
+<td class="tg-achz" rowspan="4">
+10M
+
+</td>
+<td class="tg-yzt1" rowspan="2">
+RSYNC
+
+</td>
+<td class="tg-yw4l">
+51.02
+
+</td>
+<td class="tg-yw4l">
+0.79
+
+</td>
+<td class="tg-yw4l">
+0.51
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+0.26
+
+</td>
+<td class="tg-yw4l">
+0.03
+
+</td>
+<td class="tg-yw4l">
+0.00
+
+</td>
+</tr>
+<tr>
+<td class="tg-d1kj" rowspan="2">
+CP
+
+</td>
+<td class="tg-yw4l">
+53.00
+
+</td>
+<td class="tg-yw4l">
+0.38
+
+</td>
+<td class="tg-yw4l">
+0.04
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+0.26
+
+</td>
+<td class="tg-yw4l">
+0.04
+
+</td>
+<td class="tg-yw4l">
+0.00
+
+</td>
+</tr>
+<tr>
+<td class="tg-7crq" rowspan="4">
+20M
+
+</td>
+<td class="tg-yzt1" rowspan="2">
+RSYNC
+
+</td>
+<td class="tg-yw4l">
+30.42
+
+</td>
+<td class="tg-yw4l">
+0.52
+
+</td>
+<td class="tg-yw4l">
+0.47
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+0.15
+
+</td>
+<td class="tg-yw4l">
+0.02
+
+</td>
+<td class="tg-yw4l">
+0.00
+
+</td>
+</tr>
+<tr>
+<td class="tg-d1kj" rowspan="2">
+CP
+
+</td>
+<td class="tg-yw4l">
+28.59
+
+</td>
+<td class="tg-yw4l">
+0.20
+
+</td>
+<td class="tg-yw4l">
+0.03
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+0.14
+
+</td>
+<td class="tg-yw4l">
+0.02
+
+</td>
+<td class="tg-yw4l">
+0.000
+
+</td>
+</tr>
+<tr>
+<td class="tg-031e" rowspan="12">
+500M
+
+</td>
+<td class="tg-kjho" rowspan="4">
+2M
+
+</td>
+<td class="tg-yzt1" rowspan="2">
+RSYNC
+
+</td>
+<td class="tg-031e">
+1022.57
+
+</td>
+<td class="tg-031e">
+13.85
+
+</td>
+<td class="tg-031e">
+4.17
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+6.48
+
+</td>
+<td class="tg-yw4l">
+0.96
+
+</td>
+<td class="tg-yw4l">
+0.11
+
+</td>
+</tr>
+<tr>
+<td class="tg-d1kj" rowspan="2">
+CP
+
+</td>
+<td class="tg-yw4l">
+957.04
+
+</td>
+<td class="tg-yw4l">
+7.73
+
+</td>
+<td class="tg-yw4l">
+0.99
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+6.22
+
+</td>
+<td class="tg-yw4l">
+0.95
+
+</td>
+<td class="tg-yw4l">
+0.09
+
+</td>
+</tr>
+<tr>
+<td class="tg-achz" rowspan="4">
+10M
+
+</td>
+<td class="tg-yzt1" rowspan="2">
+RSYNC
+
+</td>
+<td class="tg-yw4l">
+244.52
+
+</td>
+<td class="tg-yw4l">
+3.63
+
+</td>
+<td class="tg-yw4l">
+2.54
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+1.26
+
+</td>
+<td class="tg-yw4l">
+0.02
+
+</td>
+<td class="tg-yw4l">
+0.19
+
+</td>
+</tr>
+<tr>
+<td class="tg-d1kj" rowspan="2">
+CP
+
+</td>
+<td class="tg-yw4l">
+243.73
+
+</td>
+<td class="tg-yw4l">
+1.81
+
+</td>
+<td class="tg-yw4l">
+0.21
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+1.30
+
+</td>
+<td class="tg-yw4l">
+0.19
+
+</td>
+<td class="tg-yw4l">
+0.01
+
+</td>
+</tr>
+<tr>
+<td class="tg-7crq" rowspan="4">
+20M
+
+</td>
+<td class="tg-yw4l" rowspan="2">
+RSYNC
+
+</td>
+<td class="tg-yw4l">
+142.88
+
+</td>
+<td class="tg-yw4l">
+2.69
+
+</td>
+<td class="tg-yw4l">
+2.30
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+0.62
+
+</td>
+<td class="tg-yw4l">
+0.09
+
+</td>
+<td class="tg-yw4l">
+0.01
+
+</td>
+</tr>
+<tr>
+<td class="tg-d1kj" rowspan="2">
+CP
+
+</td>
+<td class="tg-yw4l">
+132.73
+
+</td>
+<td class="tg-yw4l">
+0.95
+
+</td>
+<td class="tg-yw4l">
+0.08
+
+</td>
+</tr>
+<tr>
+<td class="tg-yw4l">
+0.67
+
+</td>
+<td class="tg-yw4l">
+0.10
+
+</td>
+<td class="tg-yw4l">
+0.00
+
+</td>
+</tr>
+</tbody>
+</table>
+
+<hr>
+<p><strong>[root@fedora24 \~]# nfsiostat</strong></p>
+<p><strong>suse42_n2:/sink mounted on /sink:</strong></p>
+<p><strong>ops/s rpc bklog</strong></p>
+<p><strong>101.887 0.000</strong></p>
+<p><strong>read: ops/s kB/s kB/op retrans avg RTT (ms) avg exe (ms)</strong></p>
+<p><strong>3.138 51.153 16.300 0 (0.0%) 0.549 0.560</strong></p>
+<p><strong>write: ops/s kB/s kB/op retrans avg RTT (ms) avg exe (ms)</strong></p>
+<p><strong>6.654 109.051 16.389 0 (0.0%) 34.072 34.098</strong></p>
+<p><strong>suse42_n1:/source mounted on /source:</strong></p>
+<p><strong>ops/s rpc bklog</strong></p>
+<p><strong>79.758 0.000</strong></p>
+<p><strong>read: ops/s kB/s kB/op retrans avg RTT (ms) avg exe (ms)</strong></p>
+<p><strong>5.091 82.983 16.300 0 (0.0%) 0.730 0.740</strong></p>
+<p><strong>write: ops/s kB/s kB/op retrans avg RTT (ms) avg exe (ms)</strong></p>
+<p><strong>4.714 77.251 16.389 0 (0.0%) 25.937 25.960</strong></p>
+<hr>
+<p>I stopped here because I conceived no further insights could be made by having more runs. I am prepared to get corrected on that.</p>
+<h1>Conclusion</h1>
+<p>Some insights I got herefrom were as expected. Others quite surprised me. I did not expect that the delta sync after a cp would be only <strong>\~10-15%</strong> percent less performant than the sync after a preceding rsync approach. Moreover, I expected both tools to have hard times when it comes to migrating small files, but I honestly fathomed cp to outstrip rsync here clearly. It does not. cp shows to be ahead when it comes to larger files. But still, the difference is not astoundingly significant so to speak. That may deviate with real hugely whopping files, what I may look into deeper.  What I mainly take away for me is, that in the <strong>average real world case</strong> it does not really matter which tool to choose for migrating data when  performance aspects with respects to network based file systems play a role. Coreutils' cp does not necessarly outperform rsync over network based file systems.</p>
+    </div><!-- /.entry-content -->
+    <footer class="post-meta">
+        <span class="meta-prep">Category:</span>
+        <abbr class="category">
+            <a href="https://cherusk.github.io/category/lnx-systems-engineering.html">LNX Systems Engineering</a>
+        </abbr>
+    </footer>
+    <section id="respond">
+        <div id="disqus_thread">
+        <script type="text/javascript">
+        var disqus_identifier = "rsync-or-cp-over-net-based-file-systems.html";
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        </div>
+
+    </section>
+</section>
+
+
+        </section><!-- #content -->
+        <section id="widgets" class="grid col-300 fit" >
+            <!--
+            <section id="widget-search" class="widget-wrapper widget_search">
+
+                <form id="searchform" action="http://www.google.com/search" method="get">
+                    <input id="q" class="field" type="text" placeholder="Search Blog" name="q" ></input>
+                    <input id="ie" name="ie" type="hidden" value="utf-8" ></input>
+                    <input id="oe" name="oe" type="hidden" value="utf-8" ></input>
+                    <input id="channel" name="channel" type="hidden" value="suggest" ></input>
+                    <input id="searchsubmit" class="submit" type="submit" value="">
+                </form>
+            </section>
+            -->
+            <section id="widget-category" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Category
+                </div>
+                <ul>
+                        <li><a href="https://cherusk.github.io/category/lnx-network-engineering-research.html" >LNX Network Engineering Research </a></li>
+                        <li><a href="https://cherusk.github.io/category/lnx-systems-engineering.html" >LNX Systems Engineering </a></li>
+                        <li><a href="https://cherusk.github.io/category/visions.html" >Visions </a></li>
+                </ul>
+            </section>
+
+            <section id="widget-tagcloud" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Tagcloud
+                </div>
+                <div>
+                </div>
+            </section>
+
+
+            <section id="widget-links" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Links
+                </div>
+                <ul>
+                        <li><a href="http://github.com/cherusk">github</a></li>
+                </ul>
+            </section>
+            
+        </section><!-- widgets -->
+    </section><!-- /#wrapper -->
+    <footer id="footer" class="clearfix"><section class="footer-wrapper">
+        <div class="grid col-940" >
+            <div class="grid col-540"></div>
+            <div class="grid col-380 fit" >
+                <ul class="social-icons">
+                    <!-- TO BE CONTINUED -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="grid col-300 copyright" >
+            <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" rel="license">
+                <img src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" style="border-width:0" alt="知识共享许可协议"></img>
+            </a>
+        </div>
+        <div class="grid col-300 ">
+
+        </div>
+        <div class="grid col-300 fit powered">
+            Powered by <a href="http://getpelican.com/">Pelican</a> <br />
+            which takes great advantage of <a href="http://python.org">Python</a>
+        </div>
+    </section></footer>
+</div>
+</body>
+</html>

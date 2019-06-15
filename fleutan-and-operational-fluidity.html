@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <title>cherusk Tech Blog</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/style.css' type="text/css" media="all" />
+    <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/highlight.css' type="text/css" media="all" />
+    <link href="https://cherusk.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="cherusk Tech Blog Full Atom Feed" />
+    
+</head>
+
+<body id="index" class="blog">
+<div id="container" class="hfeed">
+    <header id="header" >
+        <div id="logo">
+            <h1><img src="https://cherusk.github.io//meta/cherusk.png" width="500" height="300" alt="小铱的故事" />
+                cherusk Tech Blog</h1>
+        </div> <!-- /#logo-->
+        <nav id="menu" class="main-nav"><ul class="menu">
+            <li  class="active"><a href="https://cherusk.github.io/pages/about.html">About</a></li>
+
+        </ul></nav><!-- /#menu -->
+    </header>
+    <section id="wrapper" class="clearfix">
+        <section id="content" class="grid col-620" >
+                <section class="breadcrumb-list">
+<a href="https://cherusk.github.io">Blog</a> ›<a href="category/lnx-network-engineering-research.html">LNX Network Engineering Research</a> ›Fleutan - and operational FLUIDITY
+                </section>
+
+
+<section id="post" class="post hentry">
+    <header>
+    <h2 class="post-title" >Fleutan - and operational FLUIDITY</h2>
+    
+    <div class="post-meta">
+        <span class="meta-prep">Post in</span>
+        <abbr class="date" title="2017-08-19T10:11:00+00:00"> 
+            <a href="https://cherusk.github.io/archive/2017/Aug/index.html">Sat 19 August 2017 </a>
+        </abbr>
+        <span class="meta-prep"> |Tags</span>
+                <a href="https://cherusk.github.io/tag/analysis.html">analysis</a>
+                <a href="https://cherusk.github.io/tag/bandwith-product.html">bandwith product</a>
+                <a href="https://cherusk.github.io/tag/bcc.html">bcc</a>
+                <a href="https://cherusk.github.io/tag/correlation.html">correlation</a>
+                <a href="https://cherusk.github.io/tag/cwnd.html">cwnd</a>
+                <a href="https://cherusk.github.io/tag/ebpf.html">ebpf</a>
+                <a href="https://cherusk.github.io/tag/flow-grouping.html">flow grouping</a>
+                <a href="https://cherusk.github.io/tag/flowing.html">flowing</a>
+                <a href="https://cherusk.github.io/tag/flowing-engineering.html">flowing engineering</a>
+                <a href="https://cherusk.github.io/tag/introspection.html">introspection</a>
+                <a href="https://cherusk.github.io/tag/kernel.html">kernel</a>
+                <a href="https://cherusk.github.io/tag/linux.html">linux</a>
+                <a href="https://cherusk.github.io/tag/linux-engineering.html">linux engineering</a>
+                <a href="https://cherusk.github.io/tag/mechanism.html">mechanism</a>
+                <a href="https://cherusk.github.io/tag/net-traversal.html">net traversal</a>
+                <a href="https://cherusk.github.io/tag/network-paths.html">network paths</a>
+                <a href="https://cherusk.github.io/tag/network-stack.html">network stack</a>
+                <a href="https://cherusk.github.io/tag/networking.html">networking</a>
+                <a href="https://cherusk.github.io/tag/operations.html">operations</a>
+                <a href="https://cherusk.github.io/tag/perf.html">perf</a>
+                <a href="https://cherusk.github.io/tag/performance.html">performance</a>
+                <a href="https://cherusk.github.io/tag/python.html">python</a>
+                <a href="https://cherusk.github.io/tag/qdisc.html">qdisc</a>
+                <a href="https://cherusk.github.io/tag/research.html">research</a>
+                <a href="https://cherusk.github.io/tag/resource-usage.html">resource usage</a>
+                <a href="https://cherusk.github.io/tag/ss.html">ss</a>
+                <a href="https://cherusk.github.io/tag/stack-config.html">stack config</a>
+                <a href="https://cherusk.github.io/tag/statistics.html">statistics</a>
+                <a href="https://cherusk.github.io/tag/suite.html">suite</a>
+                <a href="https://cherusk.github.io/tag/system-operations.html">system operations</a>
+                <a href="https://cherusk.github.io/tag/tcp.html">tcp</a>
+                <a href="https://cherusk.github.io/tag/tcp-flows.html">tcp flows</a>
+                <a href="https://cherusk.github.io/tag/tcpip.html">tcp/ip</a>
+                <a href="https://cherusk.github.io/tag/tool.html">tool</a>
+                <a href="https://cherusk.github.io/tag/traffic-flows.html">traffic flows</a>
+                <a href="https://cherusk.github.io/tag/traffic-volume.html">traffic volume</a>
+                <a href="https://cherusk.github.io/tag/trouble-shooting.html">trouble shooting</a>
+                <a href="https://cherusk.github.io/tag/tuning.html">Tuning</a>
+                <a href="https://cherusk.github.io/tag/user-land.html">user land</a>
+        <!-- TOBE COMMENTS -->
+    </div>
+    </header>
+    <div class="post-entry">
+        <h1><a href="https://github.com/cherusk/fleutan">Influence on GitHub</a></h1>
+<p><img alt="logo" class="alignnone size-full wp-image-2340" height="1183" src="https://cherusk.github.io/2017/08/logo.png" width="1400"></p>
+<h2>Notion</h2>
+<p>What is Fleutan? It's meant as a general tooling suite around all sort of flowing connected apparitions on unixoid systems (especially linux). Though, it's far from complete and should meanwhile rather been seen as a first illustrating radicales to show the desire for standardized open meta tooling suits around advanced network concepts in unxoid systems. The purpose was also not to compete with anything around in this area but rather either augment (install operators with wieldability) it or complement it, since brilliant suits and low level tooling is amplesomely around in the open wild.</p>
+<p><strong>NB</strong>: This blog is rather meant as another tentacle to make the Project conveniently spottable and therefore rather sparse in order to prevent forming a duplicate of the Github appearance. Look for link at the top. Moreover, I gave a similar outline on <a href="https://www.quora.com/unanswered/Endpoint-focussed-Scalable-Flows-Paths-wielding">quora</a>.</p>
+<h2>Use Cases</h2>
+<p>Nominally, one would spin a <span class="inline_editor_value"><span class="rendered_qtext">SDN or comparable technologies allowing to take track of traffic as a minimum granularity on flow level as Fleutan does. In other words, some more or less centric component would do the aggregation and analysis in a holistic manner. Depending on the detail gathering strategies of a centric solution, though, for nifty trouble shooting or network related performance tuning decisions, only a closer look on the end nodes in scope makes a sane action taking or correlation tangible.<br>
+</span></span></p>
+<p>E.g., let's take a look at convenient way to see the associativity between active network processing entities (processes) and the cpu core usage distribution with Fleutan over time. This example is trivial, but it illustrates that from this one can quickly get an overview for which network intensive processes for instance affinity tunings on a global manner are profitable to performance. In this case, the firefox processes are rather dancing around and could be tuned.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">fleutan</span> <span class="n">flows</span> <span class="c1">--cpu -i 5</span>
+<span class="o">~&gt;/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">thunderbird</span><span class="o">/</span><span class="n">thunderbird</span><span class="p">(</span><span class="mi">2847</span><span class="p">)</span>
+<span class="n">tcp</span>              <span class="mi">192</span><span class="p">.</span><span class="mi">168</span><span class="p">.</span><span class="mi">10</span><span class="p">.</span><span class="mi">50</span><span class="o">#</span><span class="mi">34718</span>                     <span class="mi">212</span><span class="p">.</span><span class="mi">227</span><span class="p">.</span><span class="mi">17</span><span class="p">.</span><span class="mi">170</span><span class="o">#</span><span class="mi">993</span>
+<span class="n">tcp</span>              <span class="mi">192</span><span class="p">.</span><span class="mi">168</span><span class="p">.</span><span class="mi">10</span><span class="p">.</span><span class="mi">50</span><span class="o">#</span><span class="mi">55258</span>                     <span class="mi">194</span><span class="p">.</span><span class="mi">25</span><span class="p">.</span><span class="mi">134</span><span class="p">.</span><span class="mi">115</span><span class="o">#</span><span class="mi">993</span>
+<span class="n">___</span>
+
+<span class="o">####################################################################################################</span>
+<span class="o">*************************************************************************</span>          <span class="mi">100</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">0</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">1</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">2</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">3</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">4</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">5</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">6</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">7</span>
+<span class="p">...</span>
+<span class="o">~&gt;</span><span class="n">hexchat</span><span class="p">(</span><span class="mi">11290</span><span class="p">)</span>
+<span class="n">tcp</span>       <span class="mi">2003</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">4655</span><span class="p">:</span><span class="mi">968</span><span class="n">b</span><span class="p">:</span><span class="mi">18</span><span class="n">d0</span><span class="p">:</span><span class="mi">33</span><span class="n">a6</span><span class="p">:</span><span class="mi">3314</span><span class="p">:</span><span class="mi">7</span><span class="n">c7</span><span class="o">#</span><span class="mi">34482</span>               <span class="mi">2001</span><span class="p">:</span><span class="mi">5</span><span class="n">a0</span><span class="p">:</span><span class="mi">3604</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span><span class="mi">64</span><span class="p">:</span><span class="mi">86</span><span class="p">:</span><span class="mi">243</span><span class="p">:</span><span class="mi">181</span><span class="o">#</span><span class="mi">6667</span>
+<span class="n">tcp</span>       <span class="mi">2003</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">4655</span><span class="p">:</span><span class="mi">968</span><span class="n">b</span><span class="p">:</span><span class="mi">18</span><span class="n">d0</span><span class="p">:</span><span class="mi">33</span><span class="n">a6</span><span class="p">:</span><span class="mi">3314</span><span class="p">:</span><span class="mi">7</span><span class="n">c7</span><span class="o">#</span><span class="mi">38930</span>               <span class="mi">2</span><span class="n">a02</span><span class="p">:</span><span class="mi">2</span><span class="n">f0d</span><span class="p">:</span><span class="n">bff0</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span><span class="mi">81</span><span class="p">:</span><span class="mi">18</span><span class="p">:</span><span class="mi">73</span><span class="p">:</span><span class="mi">123</span><span class="o">#</span><span class="mi">6667</span>
+<span class="n">tcp</span>       <span class="mi">2003</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">4655</span><span class="p">:</span><span class="mi">968</span><span class="n">b</span><span class="p">:</span><span class="mi">18</span><span class="n">d0</span><span class="p">:</span><span class="mi">33</span><span class="n">a6</span><span class="p">:</span><span class="mi">3314</span><span class="p">:</span><span class="mi">7</span><span class="n">c7</span><span class="o">#</span><span class="mi">35660</span>                 <span class="mi">2605</span><span class="p">:</span><span class="n">ac00</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="mi">39</span><span class="p">::</span><span class="mi">38</span><span class="o">#</span><span class="mi">6697</span>
+<span class="n">___</span>
+
+<span class="o">####################################################################################################</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">0</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">1</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">2</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">3</span>
+<span class="o">*************************************************************************</span>          <span class="mi">150</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">4</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">5</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">6</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">7</span>
+<span class="p">...</span>
+<span class="o">~&gt;/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">firefox</span><span class="o">/</span><span class="n">firefox</span><span class="p">(</span><span class="mi">11181</span><span class="p">)</span>
+<span class="n">tcp</span>       <span class="mi">2003</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">4655</span><span class="p">:</span><span class="mi">968</span><span class="n">b</span><span class="p">:</span><span class="mi">18</span><span class="n">d0</span><span class="p">:</span><span class="mi">33</span><span class="n">a6</span><span class="p">:</span><span class="mi">3314</span><span class="p">:</span><span class="mi">7</span><span class="n">c7</span><span class="o">#</span><span class="mi">59780</span>                <span class="mi">2</span><span class="n">a00</span><span class="p">:</span><span class="mi">1450</span><span class="p">:</span><span class="mi">4021</span><span class="p">:</span><span class="k">c</span><span class="p">::</span><span class="n">b</span><span class="o">#</span><span class="mi">443</span>
+<span class="n">tcp</span>       <span class="mi">2003</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">4655</span><span class="p">:</span><span class="mi">968</span><span class="n">b</span><span class="p">:</span><span class="mi">18</span><span class="n">d0</span><span class="p">:</span><span class="mi">33</span><span class="n">a6</span><span class="p">:</span><span class="mi">3314</span><span class="p">:</span><span class="mi">7</span><span class="n">c7</span><span class="o">#</span><span class="mi">59774</span>                <span class="mi">2</span><span class="n">a00</span><span class="p">:</span><span class="mi">1450</span><span class="p">:</span><span class="mi">4021</span><span class="p">:</span><span class="k">c</span><span class="p">::</span><span class="n">b</span><span class="o">#</span><span class="mi">443</span>
+<span class="n">tcp</span>       <span class="mi">2003</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">4655</span><span class="p">:</span><span class="mi">968</span><span class="n">b</span><span class="p">:</span><span class="mi">18</span><span class="n">d0</span><span class="p">:</span><span class="mi">33</span><span class="n">a6</span><span class="p">:</span><span class="mi">3314</span><span class="p">:</span><span class="mi">7</span><span class="n">c7</span><span class="o">#</span><span class="mi">44950</span>               <span class="mi">2</span><span class="n">a00</span><span class="p">:</span><span class="mi">1450</span><span class="p">:</span><span class="mi">4001</span><span class="p">:</span><span class="mi">81</span><span class="n">f</span><span class="p">::</span><span class="mi">200</span><span class="n">e</span><span class="o">#</span><span class="mi">443</span>
+<span class="n">___</span>
+
+<span class="o">####################################################################################################</span>
+<span class="o">************************</span>                                                            <span class="mi">15</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">0</span>
+<span class="o">**************</span>                                                                       <span class="mi">9</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">1</span>
+<span class="o">***************************************</span>                                             <span class="mi">24</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">2</span>
+<span class="o">*****************************</span>                                                       <span class="mi">18</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">3</span>
+<span class="o">****</span>                                                                                 <span class="mi">3</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">4</span>
+                                                                                     <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">5</span>
+<span class="o">**************************************************************************</span>          <span class="mi">45</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">6</span>
+<span class="o">***********************************************************</span>                         <span class="mi">36</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">7</span>
+</pre></div>
+
+
+</blockquote>
+<p>On top, might wants to rebalance the flowing activity being currently gushed out of the network stack  over the different queueing discipline instances on the egress side of the stack.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">fleutan</span> <span class="n">flows</span> <span class="o">-</span><span class="n">q</span> <span class="o">-</span><span class="n">i</span> <span class="mi">5</span>
+
+<span class="n">qdisc</span> <span class="n">queues</span> <span class="o">#&gt;</span>
+<span class="k">load</span> <span class="p">(</span><span class="n">bytes</span><span class="p">)</span> <span class="n">per</span> <span class="n">qu</span>
+<span class="o">####################################################################################################</span>
+<span class="err">███████████████████████</span>                                                              <span class="mi">0</span><span class="p">.</span><span class="mi">3</span><span class="n">K</span>          <span class="mi">0</span>
+<span class="err">██████████████████████████████████████████████████████████████████████████</span>          <span class="mi">1</span><span class="p">.</span><span class="mi">00</span><span class="n">K</span>          <span class="mi">1</span>
+<span class="c1">----</span>
+
+<span class="n">flowing</span> <span class="n">volumes</span> <span class="n">per</span> <span class="n">qu</span> <span class="o">##&gt;</span>
+<span class="mi">0</span>
+<span class="o">#######################################################################################################################################################</span>
+<span class="err">████</span>                                                         <span class="mi">66</span><span class="p">.</span><span class="mi">00</span>                 <span class="mi">192</span><span class="p">.</span><span class="mi">168</span><span class="p">.</span><span class="mi">10</span><span class="p">.</span><span class="mi">50</span><span class="o">#</span><span class="mi">47956</span>         <span class="mi">91</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">49</span><span class="p">.</span><span class="mi">97</span><span class="o">#</span><span class="mi">80</span>                         
+<span class="err">█████</span>                                                        <span class="mi">78</span><span class="p">.</span><span class="mi">00</span>                            <span class="p">::</span><span class="o">#</span><span class="mi">58</span>                      <span class="p">::</span><span class="o">#</span><span class="mi">0</span>                          
+<span class="err">██████</span>                                                       <span class="mi">86</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">2003</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">4625</span><span class="p">:</span><span class="n">d1a4</span><span class="p">:</span><span class="n">a166</span><span class="p">:</span><span class="n">cf47</span><span class="p">:</span><span class="mi">30</span><span class="n">a6</span><span class="p">:</span><span class="n">e612</span><span class="o">#</span><span class="mi">51358</span> <span class="mi">2</span><span class="n">a00</span><span class="p">:</span><span class="mi">1450</span><span class="p">:</span><span class="mi">4001</span><span class="p">:</span><span class="mi">80</span><span class="n">b</span><span class="p">::</span><span class="mi">200</span><span class="n">a</span><span class="o">#</span><span class="mi">80</span>    
+<span class="err">██████</span>                                                       <span class="mi">86</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">2003</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">4625</span><span class="p">:</span><span class="n">d1a4</span><span class="p">:</span><span class="n">a166</span><span class="p">:</span><span class="n">cf47</span><span class="p">:</span><span class="mi">30</span><span class="n">a6</span><span class="p">:</span><span class="n">e612</span><span class="o">#</span><span class="mi">51360</span> <span class="mi">2</span><span class="n">a00</span><span class="p">:</span><span class="mi">1450</span><span class="p">:</span><span class="mi">4001</span><span class="p">:</span><span class="mi">80</span><span class="n">b</span><span class="p">::</span><span class="mi">200</span><span class="n">a</span><span class="o">#</span><span class="mi">80</span>
+
+<span class="c1">----</span>
+<span class="n">flowing</span> <span class="n">volumes</span> <span class="n">per</span> <span class="n">qu</span> <span class="o">##&gt;</span>
+<span class="mi">1</span>
+<span class="o">#######################################################################################################################################################</span>
+<span class="err">██████</span>                                                       <span class="mi">86</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">2002</span><span class="p">:</span><span class="mi">22</span><span class="p">:</span><span class="mi">4625</span><span class="p">:</span><span class="n">d1a4</span><span class="p">:</span><span class="n">a166</span><span class="p">:</span><span class="n">cf47</span><span class="p">:</span><span class="mi">30</span><span class="n">a6</span><span class="p">:</span><span class="n">e612</span><span class="o">#</span><span class="mi">51360</span> <span class="mi">2</span><span class="n">a00</span><span class="p">:</span><span class="mi">1450</span><span class="p">:</span><span class="mi">4001</span><span class="p">:</span><span class="mi">80</span><span class="n">b</span><span class="p">::</span><span class="mi">200</span><span class="n">a</span><span class="o">#</span><span class="mi">80</span>    
+<span class="err">███████</span>                                                     <span class="mi">112</span><span class="p">.</span><span class="mi">00</span>                 <span class="mi">192</span><span class="p">.</span><span class="mi">168</span><span class="p">.</span><span class="mi">10</span><span class="p">.</span><span class="mi">50</span><span class="o">#</span><span class="mi">43660</span>        <span class="mi">192</span><span class="p">.</span><span class="mi">111</span><span class="p">.</span><span class="mi">249</span><span class="p">.</span><span class="mi">9</span><span class="o">#</span><span class="mi">443</span>                        
+<span class="err">████████████</span>                                                <span class="mi">172</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">2003</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">4625</span><span class="p">:</span><span class="n">d1a4</span><span class="p">:</span><span class="n">a166</span><span class="p">:</span><span class="n">cf47</span><span class="p">:</span><span class="mi">30</span><span class="n">a6</span><span class="p">:</span><span class="n">e612</span><span class="o">#</span><span class="mi">55834</span> <span class="mi">2</span><span class="n">a02</span><span class="p">:</span><span class="mi">26</span><span class="n">f0</span><span class="p">:</span><span class="n">fc</span><span class="p">::</span><span class="mi">5</span><span class="n">c7a</span><span class="p">:</span><span class="mi">317</span><span class="k">c</span><span class="o">#</span><span class="mi">80</span>     
+<span class="err">██████████████████████████████████████████████████</span>          <span class="mi">710</span><span class="p">.</span><span class="mi">00</span>          <span class="mi">2003</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">4625</span><span class="p">:</span><span class="n">d1a4</span><span class="p">:</span><span class="n">a166</span><span class="p">:</span><span class="n">cf47</span><span class="p">:</span><span class="mi">30</span><span class="n">a6</span><span class="p">:</span><span class="n">e612</span><span class="o">#</span><span class="mi">54292</span> <span class="mi">2</span><span class="n">a00</span><span class="p">:</span><span class="mi">1450</span><span class="p">:</span><span class="mi">4001</span><span class="p">:</span><span class="mi">819</span><span class="p">::</span><span class="mi">200</span><span class="n">e</span><span class="o">#</span><span class="mi">443</span>
+</pre></div>
+
+
+</blockquote>
+<p>For further examples, please visit the Github appearance.</p>
+<h2>Thinkable Outlook</h2>
+<ul>
+<li>incorporation into current open monitoring/analysis solutions like the ELK stack solution, namely as a backend mechanism to gather flowing related stats</li>
+<li>growing several APIs to it or turning parts of it to a generic library to make it's purpose spinnable from different technologies</li>
+<li>having a look at growing RDMA flowing and incoroporate it into the suite</li>
+</ul>
+    </div><!-- /.entry-content -->
+    <footer class="post-meta">
+        <span class="meta-prep">Category:</span>
+        <abbr class="category">
+            <a href="https://cherusk.github.io/category/lnx-network-engineering-research.html">LNX Network Engineering Research</a>
+        </abbr>
+    </footer>
+    <section id="respond">
+        <div id="disqus_thread">
+        <script type="text/javascript">
+        var disqus_identifier = "fleutan-and-operational-fluidity.html";
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        </div>
+
+    </section>
+</section>
+
+
+        </section><!-- #content -->
+        <section id="widgets" class="grid col-300 fit" >
+            <!--
+            <section id="widget-search" class="widget-wrapper widget_search">
+
+                <form id="searchform" action="http://www.google.com/search" method="get">
+                    <input id="q" class="field" type="text" placeholder="Search Blog" name="q" ></input>
+                    <input id="ie" name="ie" type="hidden" value="utf-8" ></input>
+                    <input id="oe" name="oe" type="hidden" value="utf-8" ></input>
+                    <input id="channel" name="channel" type="hidden" value="suggest" ></input>
+                    <input id="searchsubmit" class="submit" type="submit" value="">
+                </form>
+            </section>
+            -->
+            <section id="widget-category" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Category
+                </div>
+                <ul>
+                        <li><a href="https://cherusk.github.io/category/lnx-network-engineering-research.html" >LNX Network Engineering Research </a></li>
+                        <li><a href="https://cherusk.github.io/category/lnx-systems-engineering.html" >LNX Systems Engineering </a></li>
+                        <li><a href="https://cherusk.github.io/category/visions.html" >Visions </a></li>
+                </ul>
+            </section>
+
+            <section id="widget-tagcloud" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Tagcloud
+                </div>
+                <div>
+                </div>
+            </section>
+
+
+            <section id="widget-links" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Links
+                </div>
+                <ul>
+                        <li><a href="http://github.com/cherusk">github</a></li>
+                </ul>
+            </section>
+            
+        </section><!-- widgets -->
+    </section><!-- /#wrapper -->
+    <footer id="footer" class="clearfix"><section class="footer-wrapper">
+        <div class="grid col-940" >
+            <div class="grid col-540"></div>
+            <div class="grid col-380 fit" >
+                <ul class="social-icons">
+                    <!-- TO BE CONTINUED -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="grid col-300 copyright" >
+            <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" rel="license">
+                <img src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" style="border-width:0" alt="知识共享许可协议"></img>
+            </a>
+        </div>
+        <div class="grid col-300 ">
+
+        </div>
+        <div class="grid col-300 fit powered">
+            Powered by <a href="http://getpelican.com/">Pelican</a> <br />
+            which takes great advantage of <a href="http://python.org">Python</a>
+        </div>
+    </section></footer>
+</div>
+</body>
+</html>

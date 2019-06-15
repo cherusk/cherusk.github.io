@@ -1,0 +1,773 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>cherusk Tech Blog - LNX Systems Engineering</title><link href="https://cherusk.github.io/" rel="alternate"></link><link href="https://cherusk.github.io/feeds/lnx-systems-engineering.atom.xml" rel="self"></link><id>https://cherusk.github.io/</id><updated>2018-09-18T13:29:00+00:00</updated><entry><title>ss2 - Socket Statistics 2 (pyroute2)</title><link href="https://cherusk.github.io/ss2-socket-statistics-2-pyroute2.html" rel="alternate"></link><published>2018-09-18T13:29:00+00:00</published><updated>2018-09-18T13:29:00+00:00</updated><author><name>cherusk</name></author><id>tag:cherusk.github.io,2018-09-18:/ss2-socket-statistics-2-pyroute2.html</id><summary type="html">&lt;h2&gt;Gist&lt;/h2&gt;
+&lt;p&gt;Disseminating a complementary and viably a more modern alternative to the established &lt;strong&gt;ss&lt;/strong&gt; utility shipped with the well-known &lt;strong&gt;iproute&lt;/strong&gt; package.&lt;/p&gt;
+&lt;h4&gt;How to attain ss2?&lt;/h4&gt;
+&lt;p&gt;It's part of the &lt;a href="https://github.com/svinota/pyroute2"&gt;pyroute2 package install routines&lt;/a&gt;, so please follow those upstream to allow me to reduce redundancy in this regard.&lt;/p&gt;
+&lt;h4&gt;Example Run&lt;/h4&gt;
+&lt;p&gt;&lt;strong&gt;ss2 …&lt;/strong&gt;&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Gist&lt;/h2&gt;
+&lt;p&gt;Disseminating a complementary and viably a more modern alternative to the established &lt;strong&gt;ss&lt;/strong&gt; utility shipped with the well-known &lt;strong&gt;iproute&lt;/strong&gt; package.&lt;/p&gt;
+&lt;h4&gt;How to attain ss2?&lt;/h4&gt;
+&lt;p&gt;It's part of the &lt;a href="https://github.com/svinota/pyroute2"&gt;pyroute2 package install routines&lt;/a&gt;, so please follow those upstream to allow me to reduce redundancy in this regard.&lt;/p&gt;
+&lt;h4&gt;Example Run&lt;/h4&gt;
+&lt;p&gt;&lt;strong&gt;ss2&lt;/strong&gt; is offering, amongst many output formats, machine readable dumps of the kernel socket statistics. For it's renowned merits, json was chosen as the foremost default dumping format.&lt;/p&gt;
+&lt;p&gt;Mission is to proffer to the user of it everything the kernel can actually export as context to sockets.&lt;/p&gt;
+&lt;p&gt;Currently, as it is in its infancy, so not all aspects provided by ss have been implemented yet.&lt;/p&gt;
+&lt;figure&gt;
+&gt;    # ss2 --help
+&gt;
+&gt;    usage: ss2 [-h] [-x] [-t] [-l] [-a] [-p] [-r]ss2 - socket statistics depictor meant as a complete and convenient surrogate
+&gt;    for iproute2/misc/ss2optional arguments:
+&gt;    -h, --help show this help message and exit
+&gt;    -x, --unix Display Unix domain sockets.
+&gt;    -t, --tcp Display TCP sockets.
+&gt;    -l, --listen Display listening sockets.
+&gt;    -a, --all Display all sockets.
+&gt;    -p, --process show socket holding context
+&gt;    -r, --resolve resolve host names in addition
+
+&lt;/figure&gt;
+
+&lt;p&gt;On a recent kernel (4.17.19-200.fc28.x86_64), following schema could be expected for TCP flows:&lt;/p&gt;
+&lt;figure&gt;
+&gt;    # ss2 -t
+&gt;    {
+&gt;        "TCP": {
+&gt;            "flows": [
+&gt;                {
+&gt;                    "src": "10.0.2.15", 
+&gt;                    "src_port": 43332, 
+&gt;                    "retrans": 0, 
+&gt;                    "dst": "172.25.136.144", 
+&gt;                    "cong_algo": "cubic", 
+&gt;                    "dst_port": 22, 
+&gt;                    "meminfo": {
+&gt;                        "r": 0, 
+&gt;                        "t": 0, 
+&gt;                        "w": 0, 
+&gt;                        "f": 4096
+&gt;                    }, 
+&gt;                    "iface_idx": 0, 
+&gt;                    "inode": 45433, 
+&gt;                    "tcp_info": {
+&gt;                        "delivery_rate": 5615384, 
+&gt;                        "retrans": 0, 
+&gt;                        "data_segs_in": 19, 
+&gt;                        "rto": 201.0, 
+&gt;                        "segs_in": 35, 
+&gt;                        "rtt": 0.943, 
+&gt;                        "retransmits": 0, 
+&gt;                        "bytes_received": 5349, 
+&gt;                        "last_ack_sent": 0, 
+&gt;                        "rcv_space": 29200, 
+&gt;                        "rcv_mss": 1420, 
+&gt;                        "max_pacing_rate": 18446744073709551615, 
+&gt;                        "ca_state": 0, 
+&gt;                        "min_rtt": 260, 
+&gt;                        "segs_out": 26, 
+&gt;                        "advmss": 1460, 
+&gt;                        "state": "established", 
+&gt;                        "last_ack_recv": 113749, 
+&gt;                        "snd_wscale": 0, 
+&gt;                        "pmtu": 1500, 
+&gt;                        "busy_time": 8000, 
+&gt;                        "bytes_acked": 5630, 
+&gt;                        "rcv_ssthresh": 49800, 
+&gt;                        "total_retrans": 0, 
+&gt;                        "last_data_recv": 113749, 
+&gt;                        "unacked": 0, 
+&gt;                        "fackets": 0, 
+&gt;                        "sndbuf_limited": 0, 
+&gt;                        "sacked": 0, 
+&gt;                        "reordering": 3, 
+&gt;                        "pacing_rate": 30944495, 
+&gt;                        "rttvar": 0.859, 
+&gt;                        "snd_cwnd": 10, 
+&gt;                        "last_data_sent": 113995, 
+&gt;                        "null": 0, 
+&gt;                        "rcv_wscale": 0, 
+&gt;                        "probes": 0, 
+&gt;                        "notsent_bytes": 0, 
+&gt;                        "data_segs_out": 15, 
+&gt;                        "snd_ssthresh": null, 
+&gt;                        "lost": 0, 
+&gt;                        "ato": 40.0, 
+&gt;                        "rwnd_limited": 0, 
+&gt;                        "rcv_rtt": 0.0, 
+&gt;                        "delivery_rate_app_limited": 1, 
+&gt;                        "snd_mss": 1460, 
+&gt;                        "opts": []
+&gt;                    }
+&gt;                }
+&gt;            ]
+&gt;        }
+&gt;    }
+
+&lt;/figure&gt;</content><category term="automation"></category><category term="flows"></category><category term="json"></category><category term="kernel"></category><category term="linux"></category><category term="linux engineering"></category><category term="machine readable"></category><category term="metrics"></category><category term="network stack"></category><category term="python"></category><category term="socket"></category><category term="statistics"></category><category term="tcp flows"></category><category term="tcp/ip"></category><category term="tool"></category><category term="utility"></category></entry><entry><title>rsync or cp over net based file systems</title><link href="https://cherusk.github.io/rsync-or-cp-over-net-based-file-systems.html" rel="alternate"></link><published>2016-08-16T01:00:00+00:00</published><updated>2016-08-16T01:00:00+00:00</updated><author><name>cherusk</name></author><id>tag:cherusk.github.io,2016-08-16:/rsync-or-cp-over-net-based-file-systems.html</id><summary type="html">&lt;h1&gt;Question&lt;/h1&gt;
+&lt;p&gt;Skimming the net with all thinkable efforts I could find some passionately led discussions and interesting articles about cp and rsync performance comparisons. Foremost &lt;a href="https://lwn.net/Articles/400489/"&gt;LWN-CP-RSYNC&lt;/a&gt; raised my attention for it promising in a technically perfect manner a more than doubling of throughput when opting for coreutils' cp in default …&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Question&lt;/h1&gt;
+&lt;p&gt;Skimming the net with all thinkable efforts I could find some passionately led discussions and interesting articles about cp and rsync performance comparisons. Foremost &lt;a href="https://lwn.net/Articles/400489/"&gt;LWN-CP-RSYNC&lt;/a&gt; raised my attention for it promising in a technically perfect manner a more than doubling of throughput when opting for coreutils' cp in default local data migration setups instead for rsync.  For me being a Data Centre engineer,  I was wondering if cp would still outperform rsync when data is to be beamed over non-local, net based file systems. Although being vividly discussed, I could not find any recent and reliabe data to that topic online. I expected the for the local migration measured  findings to hold for net based file systems because of the minimalistic data pushing facilities of cp and the a little more complex architecture and algorithms of rsync. I did not consider cat or cpio here since both seem to show the more or less same performance level as cp.&lt;/p&gt;
+&lt;h1&gt;Setup&lt;/h1&gt;
+&lt;p&gt;I chose a minimal but still lifelike enough setup to compare the two tools. All components were based on &lt;a href="http://www.linux-kvm.org/page/Main_Page"&gt;KVM/Qemu&lt;/a&gt;  were controlled and run with &lt;a href="http://wiki.libvirt.org/page/Main_Page"&gt;libvirt&lt;/a&gt; mechanism, especially virsh. I won't go into detail about that is done as the respective docs are more exhaustive on that as I could. What I want to point out here is &lt;a href="http://libguestfs.org/virt-builder.1.html"&gt;virt-builder&lt;/a&gt; of the libguestfs package which made creating the VMs quite comfortable and quick.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="setup" class="alignnone size-full wp-image-69" height="883" src="https://cherusk.github.io/2016/08/setup.png" width="2132"&gt;&lt;/p&gt;
+&lt;p&gt;Mainly, I opted for NFS as a network based FS as it is open and quickly and with ease to configure. Moreover, it's still quite widespread in data centres as well.&lt;/p&gt;
+&lt;p&gt;Basically, the two opensuse 42.1 based VMs were the NFS serving machines. The fedora24 Server Version VM had the NFS client data pushing role. Fedora ran on kernel 4.5.7-300.fc24.x86_64, the suse ones on 4.1.12-1-default. All machines had 2024 MB phys. RAM and 1 phys. Processor.&lt;/p&gt;
+&lt;p&gt;The virsh brought up and not manually tweakd virtual net I tested with:&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;[root@suse42_n1 \~]# iperf3 -s&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;[root@fedora24 \~]# iperf3 -c suse42_n1&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;[...]&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;- - - - - - - - - - - - - - - - - - - - - - - - -&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;[ ID] Interval Transfer Bandwidth Retr&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;[ 4] 0.00-10.00 sec 2.78 GBytes 2.39 Gbits/sec 15859 sender&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;[ 4] 0.00-10.00 sec 2.78 GBytes 2.39 Gbits/sec receiver&lt;/strong&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;So not the fastest connection one seen in data centres but representative enough for the comparison.&lt;/p&gt;
+&lt;p&gt;The data source and sinks were &lt;strong&gt;5GB&lt;/strong&gt; large Virtio-Disks with BTRFS on them. Going for BTRFS was quite arbitrary since the local backend FS was not of to much of avail for the comparison.&lt;/p&gt;
+&lt;p&gt;The mounts:&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;[root@fedora24 \~]# nfsstat -m&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;/source from suse42_n1:/source&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;Flags: rw,relatime,vers=4.2,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,port=0,&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;timeo=600,retrans=2,sec=sys,clientaddr=192.168.122.89,local_lock=none,addr=192.168.122.158&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;/sink from suse42_n2:/sink&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;Flags: rw,relatime,vers=4.2,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,port=0,&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;timeo=600,retrans=2,sec=sysclientaddr,=192.168.122.89,local_lock=none,addr=192.168.122.52&lt;/strong&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1&gt;Approach&lt;/h1&gt;
+&lt;p&gt;All the action was on the fedora24 node for it being the data pushing entity. I decided to have several runs with different data constellations in /source. &lt;a href="http://linux.die.net/man/1/genbackupdata"&gt;genbackupdata&lt;/a&gt; was my tool of choice for data generation although not fully working. It promises files with distributed shape, but it can produce files only uniformly. Its &lt;strong&gt;--delete&lt;/strong&gt;, &lt;strong&gt;--rename&lt;/strong&gt;, or &lt;strong&gt;--modify&lt;/strong&gt; flags were somehow not implemented. Still, a good choice to create random data.&lt;/p&gt;
+&lt;p&gt;I went for 6 runs and generated for each.&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;genbackupdata --create=SIZE [--chunk-size=C_SIZE] [--file-size=F_SIZE] --depth=3 /source/&lt;/strong&gt;&lt;/p&gt;
+&lt;table class="tg"&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;th class="tg-9hbo"&gt;
+SIZE
+
+&lt;/th&gt;
+&lt;th class="tg-9hbo"&gt;
+C\_SIZE
+
+&lt;/th&gt;
+&lt;th class="tg-9hbo"&gt;
+F\_SIZE
+
+&lt;/th&gt;
+&lt;th class="tg-9hbo"&gt;
+Gen. Files
+
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-baqh" rowspan="3"&gt;
+100M
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+-
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+-
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+2M
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-baqh"&gt;
+80000
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+80000
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+10M
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-baqh"&gt;
+160000
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+160000
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+20M
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-baqh" rowspan="3"&gt;
+500M
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+-
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+-
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+2M
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-baqh"&gt;
+80000
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+80000
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+10M
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-baqh"&gt;
+160000
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+160000
+
+&lt;/td&gt;
+&lt;td class="tg-baqh"&gt;
+20M
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;For instance for &lt;strong&gt;genbackupdata --create=100M&lt;/strong&gt; we get:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;matthias@suse42_n1:\~&amp;gt; du -h /source/&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;2,1M    /source/0/0/0/0/0&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;2,0M    /source/0/0/0/0/1&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;2,1M    /source/0/0/0/0/6&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;2,1M    /source/0/0/0/0/2&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;[...]&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;17M    /source/0/0/0&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;17M    /source/0/0&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;17M    /source/0&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;100M    /source/&lt;/strong&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;Before every run I diligently cleaned up all the caches:&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;echo 1 &amp;gt; /proc/sys/vm/drop_caches&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;echo 2 &amp;gt; /proc/sys/vm/drop_caches&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;echo 3 &amp;gt; /proc/sys/vm/drop_caches&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;swapoff -a&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;sync&lt;/strong&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;I tracked every run:&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;time -a -o measurem -f "real %e user %U sys %S avg-io-pg-fault %F fs-in %I fs-out %O avg-mem %K max-resident %M avg-res %t cpu %P% "&lt;/strong&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;The CMD itself and intermediate steps abstractly:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;run copy&lt;/li&gt;
+&lt;li&gt;pollute source to make delta sync necessary&lt;/li&gt;
+&lt;li&gt;run sync&lt;/li&gt;
+&lt;li&gt;cleanup /sink&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;and  in practice then:&lt;/p&gt;
+&lt;hr&gt;
+&lt;ul&gt;
+&lt;li&gt;RSYNC:&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;rsync -aHv --no-whole-file --progress /source/ /sink&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;find &lt;a href="///etc/"&gt;&lt;span style="color:#3465a4;"&gt;/etc/&lt;/span&gt;&lt;/a&gt; -type f | sort -R input | head -n 50 | xargs echo "`head -c 20 &lt;a href="///dev/urandom%60%22"&gt;&lt;span style="color:#3465a4;"&gt;/dev/urandom`"&lt;/span&gt;&lt;/a&gt; &amp;gt;&amp;gt; {}&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;rsync -aHv --no-whole-file --progress /source/ /sink&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;rm -r /sink/*&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;CP&lt;strong&gt;:&lt;/strong&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;cp -au /source/cp -au /source/* /sink/* /sink/&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;find &lt;a href="///etc/"&gt;&lt;span style="color:#3465a4;"&gt;/etc/&lt;/span&gt;&lt;/a&gt; -type f | sort -R input | head -n 50 | xargs echo "`head -c 20 &lt;a href="///dev/urandom%60%22"&gt;&lt;span style="color:#3465a4;"&gt;/dev/urandom`"&lt;/span&gt;&lt;/a&gt; &amp;gt;&amp;gt; {}&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;rsync -aHv --no-whole-file --progress /source/ /sink&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;rm -r /sink/*&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h1&gt;Outcome&lt;/h1&gt;
+&lt;p&gt;The table does not show CPU usage, since that was for all runs &lt;strong&gt;&amp;lt;5%&lt;/strong&gt; for cp and &lt;strong&gt;near 20 %&lt;/strong&gt; for rsync. Therefore, the net was mainly the bottleneck, as expected.&lt;/p&gt;
+&lt;table class="tg"&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;th class="tg-031e"&gt;
+Data Mass
+
+&lt;/th&gt;
+&lt;th class="tg-yw4l"&gt;
+Filesize
+
+&lt;/th&gt;
+&lt;th class="tg-yw4l"&gt;
+Tool
+
+&lt;/th&gt;
+&lt;th class="tg-031e"&gt;
+Elapsed
+
+&lt;/th&gt;
+&lt;th class="tg-031e"&gt;
+Sys
+
+&lt;/th&gt;
+&lt;th class="tg-031e"&gt;
+User
+
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-031e" rowspan="12"&gt;
+100M
+
+&lt;/td&gt;
+&lt;td class="tg-kjho" rowspan="4"&gt;
+2M
+
+&lt;/td&gt;
+&lt;td class="tg-yzt1" rowspan="2"&gt;
+RSYNC
+
+&lt;/td&gt;
+&lt;td class="tg-031e"&gt;
+229.15
+
+&lt;/td&gt;
+&lt;td class="tg-031e"&gt;
+2.91
+
+&lt;/td&gt;
+&lt;td class="tg-031e"&gt;
+0.80
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+1.34
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.20
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.02
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-d1kj" rowspan="2"&gt;
+CP
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+272.85
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+1.86
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.26
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+1.72
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.25
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.02
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-achz" rowspan="4"&gt;
+10M
+
+&lt;/td&gt;
+&lt;td class="tg-yzt1" rowspan="2"&gt;
+RSYNC
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+51.02
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.79
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.51
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+0.26
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.03
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.00
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-d1kj" rowspan="2"&gt;
+CP
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+53.00
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.38
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.04
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+0.26
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.04
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.00
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-7crq" rowspan="4"&gt;
+20M
+
+&lt;/td&gt;
+&lt;td class="tg-yzt1" rowspan="2"&gt;
+RSYNC
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+30.42
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.52
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.47
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+0.15
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.02
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.00
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-d1kj" rowspan="2"&gt;
+CP
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+28.59
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.20
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.03
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+0.14
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.02
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.000
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-031e" rowspan="12"&gt;
+500M
+
+&lt;/td&gt;
+&lt;td class="tg-kjho" rowspan="4"&gt;
+2M
+
+&lt;/td&gt;
+&lt;td class="tg-yzt1" rowspan="2"&gt;
+RSYNC
+
+&lt;/td&gt;
+&lt;td class="tg-031e"&gt;
+1022.57
+
+&lt;/td&gt;
+&lt;td class="tg-031e"&gt;
+13.85
+
+&lt;/td&gt;
+&lt;td class="tg-031e"&gt;
+4.17
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+6.48
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.96
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.11
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-d1kj" rowspan="2"&gt;
+CP
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+957.04
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+7.73
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.99
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+6.22
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.95
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.09
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-achz" rowspan="4"&gt;
+10M
+
+&lt;/td&gt;
+&lt;td class="tg-yzt1" rowspan="2"&gt;
+RSYNC
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+244.52
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+3.63
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+2.54
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+1.26
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.02
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.19
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-d1kj" rowspan="2"&gt;
+CP
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+243.73
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+1.81
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.21
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+1.30
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.19
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.01
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-7crq" rowspan="4"&gt;
+20M
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l" rowspan="2"&gt;
+RSYNC
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+142.88
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+2.69
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+2.30
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+0.62
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.09
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.01
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-d1kj" rowspan="2"&gt;
+CP
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+132.73
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.95
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.08
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-yw4l"&gt;
+0.67
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.10
+
+&lt;/td&gt;
+&lt;td class="tg-yw4l"&gt;
+0.00
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;[root@fedora24 \~]# nfsiostat&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;suse42_n2:/sink mounted on /sink:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ops/s rpc bklog&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;101.887 0.000&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;read: ops/s kB/s kB/op retrans avg RTT (ms) avg exe (ms)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3.138 51.153 16.300 0 (0.0%) 0.549 0.560&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;write: ops/s kB/s kB/op retrans avg RTT (ms) avg exe (ms)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;6.654 109.051 16.389 0 (0.0%) 34.072 34.098&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;suse42_n1:/source mounted on /source:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ops/s rpc bklog&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;79.758 0.000&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;read: ops/s kB/s kB/op retrans avg RTT (ms) avg exe (ms)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;5.091 82.983 16.300 0 (0.0%) 0.730 0.740&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;write: ops/s kB/s kB/op retrans avg RTT (ms) avg exe (ms)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4.714 77.251 16.389 0 (0.0%) 25.937 25.960&lt;/strong&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;I stopped here because I conceived no further insights could be made by having more runs. I am prepared to get corrected on that.&lt;/p&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;Some insights I got herefrom were as expected. Others quite surprised me. I did not expect that the delta sync after a cp would be only &lt;strong&gt;\~10-15%&lt;/strong&gt; percent less performant than the sync after a preceding rsync approach. Moreover, I expected both tools to have hard times when it comes to migrating small files, but I honestly fathomed cp to outstrip rsync here clearly. It does not. cp shows to be ahead when it comes to larger files. But still, the difference is not astoundingly significant so to speak. That may deviate with real hugely whopping files, what I may look into deeper.  What I mainly take away for me is, that in the &lt;strong&gt;average real world case&lt;/strong&gt; it does not really matter which tool to choose for migrating data when  performance aspects with respects to network based file systems play a role. Coreutils' cp does not necessarly outperform rsync over network based file systems.&lt;/p&gt;</content><category term="comparison"></category><category term="cp"></category><category term="data migration"></category><category term="genbackupdata"></category><category term="ibvirt"></category><category term="KVM/Qemu"></category><category term="linux"></category><category term="networking"></category><category term="nfs"></category><category term="performance"></category><category term="rsync"></category><category term="virt-builder"></category><category term="vs"></category></entry></feed>

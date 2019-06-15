@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <title>cherusk Tech Blog</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/style.css' type="text/css" media="all" />
+    <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/highlight.css' type="text/css" media="all" />
+    <link href="https://cherusk.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="cherusk Tech Blog Full Atom Feed" />
+    
+</head>
+
+<body id="index" class="blog">
+<div id="container" class="hfeed">
+    <header id="header" >
+        <div id="logo">
+            <h1><img src="https://cherusk.github.io//meta/cherusk.png" width="500" height="300" alt="小铱的故事" />
+                cherusk Tech Blog</h1>
+        </div> <!-- /#logo-->
+        <nav id="menu" class="main-nav"><ul class="menu">
+            <li  class="active"><a href="https://cherusk.github.io/pages/about.html">About</a></li>
+
+        </ul></nav><!-- /#menu -->
+    </header>
+    <section id="wrapper" class="clearfix">
+        <section id="content" class="grid col-620" >
+<h4 class="content-archive">Articles tagged with <span style="color:rgb(0,102,204)">Traffic Control</span>: </h4>
+                <section class="breadcrumb-list">
+<a href="https://cherusk.github.io">Blog</a> ››Tag: <a href="tag/traffic-control.html">Traffic Control</a>
+                </section>
+
+
+<ul>
+<li class="posts"><article class="post hentry">
+	<header>
+		<h2 class="post-title" >
+			<a href="https://cherusk.github.io/monitoring-and-tuning-the-linux-networking-stack-egress-tx.html" rel="bookmark" title="Permalink to Monitoring and Tuning the Linux Networking Stack: Egress (TX)">Monitoring and Tuning the Linux Networking Stack: Egress (TX)</a>
+		</h2>
+		<div class="post-info">
+			<span class="post-lable">Post in</span>
+			<abbr class="date" title="2016-12-25T19:59:00+00:00"> 
+				<a href="https://cherusk.github.io/archive/2016/Dec/index.html">Sun 25 December 2016 </a>
+			</abbr>
+			<!-- COMMENTS -->
+		</div>
+	</header>
+	<div class="summary"><h1><a href="https://github.com/cherusk/kannjan/blob/master/linux_ns_egress">Edit on Github</a></h1>
+<ul>
+<li><a href="#TL;DR">TL;DR</a></li>
+<li><a href="#Approach">Approach</a></li>
+<li><a href="#traversal%20starting">TX skb traversal starting</a><ul>
+<li><a href="#Higher%20Layer">Higher Layer</a><ul>
+<li><a href="#TCP%20egress%20skeleton">TCP egress skeleton</a><ul>
+<li><a href="#">sending focal point: tcp_sendmsg</a></li>
+<li><a href="#tcp_write_xmit%20and%20tcp_transmit_skb">tcp_write_xmit and tcp_transmit_skb</a></li>
+</ul>
+</li>
+<li><a href="#IP%20code%20paths">IP code paths</a><ul>
+<li><a href="#ip_queue_xmit">ip_queue_xmit</a><ul>
+<li>coming data from TCP</li>
+<li>routing subsystem incurred costs</li>
+</ul>
+</li>
+<li><a href="#ip_local_out">ip_local_out</a><ul>
+<li><a href="#common%20tx%20sink%20for%20further%20protocols%20(like%20UDP)">common tx sink for further protocols (like UDP)</a></li>
+<li><a href="#__ip_local_out">__ip_local_out</a></li>
+<li>first netfilter hurdle</li>
+</ul>
+</li>
+<li><a href="#ip_output">ip_output</a><ul>
+<li>dst_output</li>
+<li>second …</li></ul></li></ul></li></ul></li></ul></li></ul></div>
+	<footer>
+		<span class="post-lable">Category:</span>
+		<abbr class="category">
+			<a href="https://cherusk.github.io/category/lnx-network-engineering-research.html">LNX Network Engineering Research</a>
+		</abbr>
+	</footer>
+	<hr />
+</article></li>
+</ul>
+        </section><!-- #content -->
+        <section id="widgets" class="grid col-300 fit" >
+            <!--
+            <section id="widget-search" class="widget-wrapper widget_search">
+
+                <form id="searchform" action="http://www.google.com/search" method="get">
+                    <input id="q" class="field" type="text" placeholder="Search Blog" name="q" ></input>
+                    <input id="ie" name="ie" type="hidden" value="utf-8" ></input>
+                    <input id="oe" name="oe" type="hidden" value="utf-8" ></input>
+                    <input id="channel" name="channel" type="hidden" value="suggest" ></input>
+                    <input id="searchsubmit" class="submit" type="submit" value="">
+                </form>
+            </section>
+            -->
+            <section id="widget-category" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Category
+                </div>
+                <ul>
+                        <li><a href="https://cherusk.github.io/category/lnx-network-engineering-research.html" >LNX Network Engineering Research </a></li>
+                        <li><a href="https://cherusk.github.io/category/lnx-systems-engineering.html" >LNX Systems Engineering </a></li>
+                        <li><a href="https://cherusk.github.io/category/visions.html" >Visions </a></li>
+                </ul>
+            </section>
+
+            <section id="widget-tagcloud" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Tagcloud
+                </div>
+                <div>
+                </div>
+            </section>
+
+
+            <section id="widget-links" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Links
+                </div>
+                <ul>
+                        <li><a href="http://github.com/cherusk">github</a></li>
+                </ul>
+            </section>
+            
+        </section><!-- widgets -->
+    </section><!-- /#wrapper -->
+    <footer id="footer" class="clearfix"><section class="footer-wrapper">
+        <div class="grid col-940" >
+            <div class="grid col-540"></div>
+            <div class="grid col-380 fit" >
+                <ul class="social-icons">
+                    <!-- TO BE CONTINUED -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="grid col-300 copyright" >
+            <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" rel="license">
+                <img src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" style="border-width:0" alt="知识共享许可协议"></img>
+            </a>
+        </div>
+        <div class="grid col-300 ">
+
+        </div>
+        <div class="grid col-300 fit powered">
+            Powered by <a href="http://getpelican.com/">Pelican</a> <br />
+            which takes great advantage of <a href="http://python.org">Python</a>
+        </div>
+    </section></footer>
+</div>
+</body>
+</html>

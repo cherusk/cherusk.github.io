@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <title>cherusk Tech Blog</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/style.css' type="text/css" media="all" />
+    <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/highlight.css' type="text/css" media="all" />
+    <link href="https://cherusk.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="cherusk Tech Blog Full Atom Feed" />
+    
+</head>
+
+<body id="index" class="blog">
+<div id="container" class="hfeed">
+    <header id="header" >
+        <div id="logo">
+            <h1><img src="https://cherusk.github.io//meta/cherusk.png" width="500" height="300" alt="小铱的故事" />
+                cherusk Tech Blog</h1>
+        </div> <!-- /#logo-->
+        <nav id="menu" class="main-nav"><ul class="menu">
+            <li  class="active"><a href="https://cherusk.github.io/pages/about.html">About</a></li>
+
+        </ul></nav><!-- /#menu -->
+    </header>
+    <section id="wrapper" class="clearfix">
+        <section id="content" class="grid col-620" >
+                <section class="breadcrumb-list">
+<a href="https://cherusk.github.io">Blog</a> ›<a href="category/lnx-network-engineering-research.html">LNX Network Engineering Research</a> ›Monitoring and Tuning the Linux Networking Stack: Egress (TX)
+                </section>
+
+
+<section id="post" class="post hentry">
+    <header>
+    <h2 class="post-title" >Monitoring and Tuning the Linux Networking Stack: Egress (TX)</h2>
+    
+    <div class="post-meta">
+        <span class="meta-prep">Post in</span>
+        <abbr class="date" title="2016-12-25T19:59:00+00:00"> 
+            <a href="https://cherusk.github.io/archive/2016/Dec/index.html">Sun 25 December 2016 </a>
+        </abbr>
+        <span class="meta-prep"> |Tags</span>
+                <a href="https://cherusk.github.io/tag/driver.html">driver</a>
+                <a href="https://cherusk.github.io/tag/driver-queues.html">driver queues</a>
+                <a href="https://cherusk.github.io/tag/egress.html">egress</a>
+                <a href="https://cherusk.github.io/tag/ethtool.html">ethtool</a>
+                <a href="https://cherusk.github.io/tag/kernel.html">kernel</a>
+                <a href="https://cherusk.github.io/tag/linux.html">linux</a>
+                <a href="https://cherusk.github.io/tag/monitoring.html">Monitoring</a>
+                <a href="https://cherusk.github.io/tag/msi.html">msi</a>
+                <a href="https://cherusk.github.io/tag/multi-queueing.html">multi queueing</a>
+                <a href="https://cherusk.github.io/tag/napi.html">NAPI</a>
+                <a href="https://cherusk.github.io/tag/network-stack.html">network stack</a>
+                <a href="https://cherusk.github.io/tag/networking.html">networking</a>
+                <a href="https://cherusk.github.io/tag/nic.html">nic</a>
+                <a href="https://cherusk.github.io/tag/performance.html">performance</a>
+                <a href="https://cherusk.github.io/tag/qdisc.html">qdisc</a>
+                <a href="https://cherusk.github.io/tag/queueing.html">queueing</a>
+                <a href="https://cherusk.github.io/tag/queues.html">queues</a>
+                <a href="https://cherusk.github.io/tag/queuing-discipline.html">queuing discipline</a>
+                <a href="https://cherusk.github.io/tag/sending.html">sending</a>
+                <a href="https://cherusk.github.io/tag/skb.html">skb</a>
+                <a href="https://cherusk.github.io/tag/softirq.html">softirq</a>
+                <a href="https://cherusk.github.io/tag/stack-traversal.html">stack traversal</a>
+                <a href="https://cherusk.github.io/tag/tc.html">tc</a>
+                <a href="https://cherusk.github.io/tag/traffic-control.html">Traffic Control</a>
+                <a href="https://cherusk.github.io/tag/transmission.html">transmission</a>
+                <a href="https://cherusk.github.io/tag/transmit-packet-steering.html">transmit packet steering</a>
+                <a href="https://cherusk.github.io/tag/transmitting.html">transmitting</a>
+                <a href="https://cherusk.github.io/tag/tuning.html">Tuning</a>
+                <a href="https://cherusk.github.io/tag/tx.html">TX</a>
+                <a href="https://cherusk.github.io/tag/xps.html">XPS</a>
+        <!-- TOBE COMMENTS -->
+    </div>
+    </header>
+    <div class="post-entry">
+        <h1><a href="https://github.com/cherusk/kannjan/blob/master/linux_ns_egress">Edit on Github</a></h1>
+<ul>
+<li><a href="#TL;DR">TL;DR</a></li>
+<li><a href="#Approach">Approach</a></li>
+<li><a href="#traversal%20starting">TX skb traversal starting</a><ul>
+<li><a href="#Higher%20Layer">Higher Layer</a><ul>
+<li><a href="#TCP%20egress%20skeleton">TCP egress skeleton</a><ul>
+<li><a href="#">sending focal point: tcp_sendmsg</a></li>
+<li><a href="#tcp_write_xmit%20and%20tcp_transmit_skb">tcp_write_xmit and tcp_transmit_skb</a></li>
+</ul>
+</li>
+<li><a href="#IP%20code%20paths">IP code paths</a><ul>
+<li><a href="#ip_queue_xmit">ip_queue_xmit</a><ul>
+<li>coming data from TCP</li>
+<li>routing subsystem incurred costs</li>
+</ul>
+</li>
+<li><a href="#ip_local_out">ip_local_out</a><ul>
+<li><a href="#common%20tx%20sink%20for%20further%20protocols%20(like%20UDP)">common tx sink for further protocols (like UDP)</a></li>
+<li><a href="#__ip_local_out">__ip_local_out</a></li>
+<li>first netfilter hurdle</li>
+</ul>
+</li>
+<li><a href="#ip_output">ip_output</a><ul>
+<li>dst_output</li>
+<li>second netfilter hurdle</li>
+</ul>
+</li>
+<li><a href="#netfilter%20and%20iptables%20impact">netfilter and iptables impact</a></li>
+<li><a href="#ip_finish_ouput">ip_finish_ouput</a><ul>
+<li><a href="#ip_finish_ouput2">ip_finish_ouput2</a></li>
+<li><a href="#to%20qdisc%20-%20via%20neighboring%20modules">to qdisc - via neighboring modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#qdisc">Queuing Discipline (qdisc)</a><ul>
+<li>Higher Layer Interplay<ul>
+<li><a href="#__dev_queue_xmit">__dev_queue_xmit</a><ul>
+<li>Driver Interplay - queueful or queueless</li>
+</ul>
+</li>
+<li><a href="#__dev_xmit_skb">__dev_xmit_skb</a></li>
+</ul>
+</li>
+<li><a href="#Core%20Mechanisms">Core Mechanisms</a><ul>
+<li><a href="#struct%20Qdisc">struct Qdisc</a></li>
+<li><a href="#generic%20Traffic%20Control%20interface">generic Traffic Control interface</a><ul>
+<li><a href="#enqueue%20and%20dequeue">enqueue</a></li>
+<li><a href="#enqueue%20and%20dequeue">dequeue</a></li>
+<li><a href="#requeue%20and%20dev_requeue_skb">requeue and dev_requeue_skb</a></li>
+</ul>
+</li>
+<li><a href="#__qdisc_run">__qdisc_run</a></li>
+<li><a href="#qdisc_restart">qdisc_restart</a><ul>
+<li>draining the qdisc</li>
+<li>dequeue_skb</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#qdisc%20over%20multiple%20driver%20queues">qdisc over multiple driver queues</a><ul>
+<li><a href="#multiq">multiq</a></li>
+</ul>
+</li>
+<li><a href="#Monitoring">Monitoring</a><ul>
+<li><a href="#Using%20Linux%20Traffic%20Control">Using Linux Traffic Control (tc)</a></li>
+</ul>
+</li>
+<li>Tuning<ul>
+<li><a href="#choosing%20proper%20qdisc">choosing proper qdisc</a></li>
+<li><a href="#tweaking%20qdisc%20draining">tweaking qdisc draining</a></li>
+<li><a href="#qdisc%20limit">qdisc limit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#device%20subsystem">Linux network device subsystem</a><ul>
+<li><a href="#NAPI%20/%20Device%20driver%20contract">NAPI / Device driver contract</a><ul>
+<li><a href="#egress%20device%20scheduling">device egress scheduling</a><ul>
+<li><a href="#__netif_schedule">__netif_schedule</a></li>
+<li>output_queue device list</li>
+<li><a href="#dev_kfree_skb_irq">dev_kfree_skb_irq</a><ul>
+<li>completion_queue</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#TX%20softirq%20processing">TX softirq processing</a><ul>
+<li>egress data processing loop<ul>
+<li>net_tx_action</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="http://Network%20Device%20Driver">Network Device Driver</a><ul>
+<li><a href="#Upper%20Layer%20Interplay">Upper Layer Interplay</a><ul>
+<li><a href="#sch_direct_xmit">sch_direct_xmit</a></li>
+<li><a href="#dev_hard_start_xmit">dev_hard_start_xmit</a></li>
+<li><a href="#dev_reque_skb">dev_reque_skb</a></li>
+<li><a href="#processing%20feedback">processing feedback</a></li>
+</ul>
+</li>
+<li><a href="#actual%20driver%20handover">actual driver handover</a><ul>
+<li><a href="#dev_queue_xmit_nit">dev_queue_xmit_nit</a></li>
+<li><a href="#netdev_start_xmit">netdev_start_xmit</a></li>
+</ul>
+</li>
+<li><a href="#driver%20queues">driver queues</a><ul>
+<li><a href="#multiple%20egress%20queues">multiple egress queues</a><ul>
+<li><a href="#locking">locking</a></li>
+<li>cpu contention</li>
+</ul>
+</li>
+<li><a href="#xps">Transmit Packet Steering - XPS</a></li>
+<li>egress driver ring length</li>
+</ul>
+</li>
+<li>Tuning<ul>
+<li><a href="#apply%20XPS">apply XPS</a></li>
+<li><a href="#Tune%20multi%20queuing">multi queuing</a><ul>
+<li>adjust queue count</li>
+</ul>
+</li>
+<li><a href="#adjust%20queue%20length">adjust queue length</a></li>
+</ul>
+</li>
+<li><a href="#election">CPU egress election</a></li>
+<li><a href="#Hard-IRQs">Hard-IRQs</a></li>
+</ul>
+</li>
+<li>Conclusion</li>
+<li><a href="#Appendix">Appendix</a><ul>
+<li>Illustrations<ul>
+<li><a href="#Driver%20Queue%20Based%20Scaling">Driver Queue Based Scaling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!--more-->
+
+<h1 id="TL;DR">TL;DR</h1>
+<p>With this blog article I'm seeking to complement the <a href="https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/#hardware-accelerated-receive-flow-steering-arfs">Linux RX Network Stack Monitoring and Tuning</a> with the TX concerns.</p>
+<h1 id="Approach">Approach</h1>
+<p>We'll traverse the Linux Network Stack Transmission from Top to Bottom from userland via high layer kernel concepts like sockets down to the Network Device itself. As the <a href="https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/#hardware-accelerated-receive-flow-steering-arfs">article about the RX part of the stack</a> covered TX data structures and shared concepts between RX and TX mechanisms quite well, I'll try not to reiterate those here with every scrutiny as far as doable without losing comprehensibility. Base for work was kernel 4.9.</p>
+<h1 id="traversal" starting>TX skb traversal starting</h1>
+<h1 Layer id="Higher">Higher Layer</h1>
+<h2 egress id="TCP" skeleton>TCP egress skeleton</h2>
+<h3>tcp_sendmsg</h3>
+<p>Every userland sending system call you can think of like <strong>sendto(), sendmsg(), send() or write()</strong> eventually is getting handled by <strong>tcp_sendmsg</strong>.</p>
+<p>In code: <a href="http://lxr.free-electrons.com/source/net/ipv4/tcp.c#L1097">/net/ipv4/tcp.c</a></p>
+<div>
+
+> ``` {style="color:#000000;background:#ffffff;"}
+> int tcp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
+>                 size_t size)
+> {
+>         struct iovec *iov;
+>         struct tcp_sock *tp = tcp_sk(sk);
+> /*...*/
+>                         
+>             if (forced_push(tp)) {
+>                                  tcp_mark_push(tp, skb);
+>                                  __tcp_push_pending_frames(sk, mss_now, TCP_NAGLE_PUSH);
+>                          } else if (skb == tcp_send_head(sk))
+>                                  tcp_push_one(sk, mss_now);continue;
+> /*...*/
+>                          if (copied)
+>                                  tcp_push(sk, flags & ~MSG_MORE, mss_now, TCP_NAGLE_PUSH);if ((err = sk_stream_wait_memory(sk, &timeo)) != 0)
+>                                  goto do_error;
+> /*...*/
+>  
+>  out:
+>          if (copied)
+>                  tcp_push(sk, flags, mss_now, tp->nonagle);
+>          TCP_CHECK_TIMER(sk);
+>          release_sock(sk);
+> /*...*/
+> }
+> EXPORT_SYMBOL(tcp_sendmsg);
+> ```
+
+It's intended to spare you from the pkt assembling and error handling code parts. Important are the channels that lead further down. These are the highlighted **tcp\_push** wrappers, which are end up calling **tcp\_write\_xmit.**
+
+</div>
+
+<h3 and id="tcp_write_xmit" tcp_transmit_skb>tcp_write_xmit and tcp_transmit_skb</h3>
+<p>First in <strong>tcp_write_xmit -</strong> also even throughput and latency relevant - checks and adaptions for the <strong>general</strong> <strong>pkt processing</strong> further down in the stack are being made. <strong><br>
+</strong></p>
+<p>In code: <a href="http://lxr.free-electrons.com/source/net/ipv4/tcp_output.c#L2098">/net/ipv4/tcp_output.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+static int tcp_write_xmit(struct sock <em>sk, unsigned int mss_now, int nonagle,
+                          int push_one, gfp_t gfp)
+{
+        struct tcp_sock </em>tp = tcp_sk(sk);
+        struct sk_buff <em>skb;
+        unsigned int tso_segs, sent_pkts;
+        int cwnd_quota;
+/</em>...*/
+        while ((skb = tcp_send_head(sk))) {
+                unsigned int limit;</p>
+<div class="highlight"><pre><span></span>            <span class="nv">tso_segs</span> <span class="o">=</span> <span class="nv">tcp_init_tso_segs</span><span class="ss">(</span><span class="nv">sk</span>, <span class="nv">skb</span>, <span class="nv">mss_now</span><span class="ss">)</span><span class="c1">;</span>
+            <span class="nv">BUG_ON</span><span class="ss">(</span><span class="o">!</span><span class="nv">tso_segs</span><span class="ss">)</span><span class="c1">;</span>
+
+            <span class="nv">cwnd_quota</span> <span class="o">=</span> <span class="nv">tcp_cwnd_test</span><span class="ss">(</span><span class="nv">tp</span>, <span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+            <span class="k">if</span> <span class="ss">(</span><span class="o">!</span><span class="nv">cwnd_quota</span><span class="ss">)</span>
+                    <span class="k">break</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>/<em>...</em>/</p>
+<div class="highlight"><pre><span></span>            <span class="k">if</span> <span class="ss">(</span><span class="nv">unlikely</span><span class="ss">(</span><span class="nv">tcp_transmit_skb</span><span class="ss">(</span><span class="nv">sk</span>, <span class="nv">skb</span>, <span class="mi">1</span>, <span class="nv">gfp</span><span class="ss">)))</span>
+                    <span class="k">break</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>/<em>...</em>/
+}
+```</p>
+</blockquote>
+<p>From tcp_transmit_skb we're lead into network layer processing via the callback <strong>icsk-&gt;icsk_af_ops-&gt;queue_xmit</strong> which is set to the IPv4 specific <strong>ip_queue_xmit()</strong> function during the IPv4 module initialization.</p>
+<p>In code: <a href="http://lxr.free-electrons.com/source/net/ipv4/tcp_output.c#L908">/net/ipv4/tcp_output.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+static int tcp_transmit_skb(struct sock <em>sk, struct sk_buff </em>skb, int clone_it,
+                            gfp_t gfp_mask)
+{
+        const struct inet_connection_sock <em>icsk = inet_csk(sk);
+        struct inet_sock </em>inet;
+        struct tcp_sock *tp;</p>
+<p>/<em>...MY COMMENT: tcp specific skb chekcing and forming steps </em>/</p>
+<div class="highlight"><pre><span></span>    <span class="n">icsk</span><span class="o">-&gt;</span><span class="n">icsk_af_ops</span><span class="o">-&gt;</span><span class="n">queue_xmit</span><span class="p">(</span><span class="n">skb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">inet</span><span class="o">-&gt;</span><span class="n">cork</span><span class="p">.</span><span class="n">fl</span><span class="p">);</span>
+</pre></div>
+
+
+<p>/<em>...</em>/</p>
+<div class="highlight"><pre><span></span>    <span class="k">return</span> <span class="nv">net_xmit_eval</span><span class="ss">(</span><span class="nv">err</span><span class="ss">)</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>}</p>
+<p>```</p>
+</blockquote>
+<p>Though, I don't want to go into tcp tuning knobs in detail since TCP is a highly complex tuning realm for itself. I might cover it in future updates. Excellent literature is around to give you insights if needed in ad hoc fashion.</p>
+<h2 code id="IP" paths>Network Layer: IP code paths</h2>
+<h3>ip_queue_xmit</h3>
+<p>In this function on the way down, the routing table is consulted.</p>
+<p>In code: <a href="http://lxr.free-electrons.com/source/net/ipv4/ip_output.c#L400">/net/ipv4/ip_output.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+int ip_queue_xmit(struct sock <em>sk, struct sk_buff </em>skb, struct flowi <em>fl)
+{
+        struct inet_sock </em>inet = inet_sk(sk);
+        struct net <em>net = sock_net(sk);
+        struct ip_options_rcu </em>inet_opt;
+        struct flowi4 <em>fl4;
+        struct rtable </em>rt;
+        struct iphdr *iph;
+        int res;</p>
+<div class="highlight"><pre><span></span>    <span class="cm">/* Skip all of this if the packet is already routed,</span>
+<span class="cm">     * f.e. by something like SCTP.</span>
+<span class="cm">     */</span>
+    <span class="nv">rcu_read_lock</span><span class="ss">()</span><span class="c1">;</span>
+    <span class="nv">inet_opt</span> <span class="o">=</span> <span class="nv">rcu_dereference</span><span class="ss">(</span><span class="nv">inet</span><span class="o">-&gt;</span><span class="nv">inet_opt</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="nv">fl4</span> <span class="o">=</span> <span class="o">&amp;</span><span class="nv">fl</span><span class="o">-&gt;</span><span class="nv">u</span>.<span class="nv">ip4</span><span class="c1">;</span>
+    <span class="nv">rt</span> <span class="o">=</span> <span class="nv">skb_rtable</span><span class="ss">(</span><span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="k">if</span> <span class="ss">(</span><span class="nv">rt</span><span class="ss">)</span>
+            <span class="k">goto</span> <span class="nl">packet_routed</span><span class="c1">;</span>
+
+    <span class="cm">/* Make sure we can route this packet. */</span>
+    <span class="nv">rt</span> <span class="o">=</span> <span class="ss">(</span><span class="nv">struct</span> <span class="nv">rtable</span> <span class="o">*</span><span class="ss">)</span><span class="nv">__sk_dst_check</span><span class="ss">(</span><span class="nv">sk</span>, <span class="mi">0</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="k">if</span> <span class="ss">(</span><span class="o">!</span><span class="nv">rt</span><span class="ss">)</span> {
+</pre></div>
+
+
+<p>/<em>...</em>/</p>
+<div class="highlight"><pre><span></span>             <span class="cm">/* If this fails, retransmit mechanism of transport layer will</span>
+<span class="cm">             * keep trying until route appears or the connection times</span>
+<span class="cm">             * itself out.</span>
+<span class="cm">             */</span>
+            <span class="nv">rt</span> <span class="o">=</span> <span class="nv">ip_route_output_ports</span><span class="ss">(</span><span class="nv">net</span>, <span class="nv">fl4</span>, <span class="nv">sk</span>,
+                                       <span class="nv">daddr</span>, <span class="nv">inet</span><span class="o">-&gt;</span><span class="nv">inet_saddr</span>,
+                                       <span class="nv">inet</span><span class="o">-&gt;</span><span class="nv">inet_dport</span>,
+                                       <span class="nv">inet</span><span class="o">-&gt;</span><span class="nv">inet_sport</span>,
+                                       <span class="nv">sk</span><span class="o">-&gt;</span><span class="nv">sk_protocol</span>,
+                                       <span class="nv">RT_CONN_FLAGS</span><span class="ss">(</span><span class="nv">sk</span><span class="ss">)</span>,
+                                       <span class="nv">sk</span><span class="o">-&gt;</span><span class="nv">sk_bound_dev_if</span><span class="ss">)</span><span class="c1">;</span>
+            <span class="k">if</span> <span class="ss">(</span><span class="nv">IS_ERR</span><span class="ss">(</span><span class="nv">rt</span><span class="ss">))</span>
+                    <span class="k">goto</span> <span class="nl">no_route</span><span class="c1">;</span>
+            <span class="nv">sk_setup_caps</span><span class="ss">(</span><span class="nv">sk</span>, <span class="o">&amp;</span><span class="nv">rt</span><span class="o">-&gt;</span><span class="nv">dst</span><span class="ss">)</span><span class="c1">;</span>
+    }
+    <span class="nv">skb_dst_set_noref</span><span class="ss">(</span><span class="nv">skb</span>, <span class="o">&amp;</span><span class="nv">rt</span><span class="o">-&gt;</span><span class="nv">dst</span><span class="ss">)</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>packet_routed:</p>
+<p>/<em>...</em>/
+        res = ip_local_out(net, sk, skb);
+        rcu_read_unlock();
+        return res;</p>
+<p>no_route:
+/<em>...</em>/
+}
+EXPORT_SYMBOL(ip_queue_xmit);
+```</p>
+</blockquote>
+<p>In the successful case, a route is available for the destination of the buffer, processing continues with <strong>ip_local_out.</strong></p>
+<h3>ip_local_out</h3>
+<h4 UDP_="UDP)" _like="(like" for further id="common" protocols sink tx>common tx sink for further protocols (like UDP)</h4>
+<p><strong>ip_local_out</strong> is the shared knot in the paths down the stack for several transport protocols like <strong>ip_send_skb</strong>. But for understanding the egress path, covering one transport protocol is quite enough.</p>
+<h4 id="__ip_local_out">__ip_local_out</h4>
+<p>With <strong>ip_local_out</strong> we've a wrapper around <strong>__ip_local_out</strong> that mainly awaits the outcome of the netfilter interaction of <strong>__ip_local_out</strong>.</p>
+<p>In code: <a href="http://lxr.free-electrons.com/source/net/ipv4/ip_output.c#L400">/net/ipv4/ip_output.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+int ip_local_out(struct net <em>net, struct sock </em>sk, struct sk_buff *skb)
+{
+        int err;</p>
+<div class="highlight"><pre><span></span>    <span class="nv">err</span> <span class="o">=</span> <span class="nv">__ip_local_out</span><span class="ss">(</span><span class="nv">net</span>, <span class="nv">sk</span>, <span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="k">if</span> <span class="ss">(</span><span class="nv">likely</span><span class="ss">(</span><span class="nv">err</span> <span class="o">==</span> <span class="mi">1</span><span class="ss">))</span>
+            <span class="nv">err</span> <span class="o">=</span> <span class="nv">dst_output</span><span class="ss">(</span><span class="nv">net</span>, <span class="nv">sk</span>, <span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+
+    <span class="k">return</span> <span class="nv">err</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>}
+EXPORT_SYMBOL_GPL(ip_local_out);
+```</p>
+</blockquote>
+<p>If err is returned as 1, netfilter allowed the pkt to pass and the traversal continues with <strong>dst_output</strong> further down. Otherwise, netfilter has consumed the pkt.</p>
+<h4 hurdle id="first" netfilter>first netfilter hurdle</h4>
+<p>Here the netfilter hook call at the end of <strong>__ip_local_out</strong></p>
+<blockquote>
+<p><code>{style="color:#000000;background:#ffffff;"}
+return nf_hook(NFPROTO_IPV4, NF_INET_LOCAL_OUT,
+               net, sk, skb, NULL, skb_dst(skb)-&gt;dev,
+               dst_output);</code></p>
+</blockquote>
+<h3>ip_output</h3>
+<p>The aforementioned <strong>dst_output</strong> function unfolds the buffer related <strong>output</strong> handler which is in case of TCP over IPv4 initialized to <strong>ip_output</strong>.</p>
+<h4 hurdle id="second" netfilter>second netfilter hurdle</h4>
+<p>Here you see <strong>ip_output</strong> condensed to its <strong>essential</strong> <strong>content:</strong> The second entry point to the netfilter along the egress path. If the buffer is allowed to pass according the rules, <strong>ip_finish_output</strong> is invoked as a callback on.</p>
+<p>In code: <a href="http://lxr.free-electrons.com/source/net/ipv4/ip_output.c#L370">/net/ipv4/ip_output.c</a></p>
+<blockquote>
+<p><code>{style="color:#000000;background:#ffffff;"}
+return NF_HOOK_COND(NFPROTO_IPV4, NF_INET_POST_ROUTING,
+                    net, sk, skb, NULL, dev,
+                    ip_finish_output,
+                    !(IPCB(skb)-&gt;flags &amp; IPSKB_REROUTED));</code></p>
+</blockquote>
+<h3 and id="netfilter" impact iptables>netfilter and iptables impact</h3>
+<p>As the authors in the <a href="https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/#netfilter-and-iptables">RX depiction</a> did, I am not diving further into the intrinsics of netfiler and iptables mechanism at this stage.</p>
+<p><strong><em>Important is though</em>:</strong> the same statements hold valid for the mechanics of the egress path. The more complex and numerous your filtering rules are made up, the more performance penalties are incurred upon the egress pkt processing. Nevertheless, if the rules are needed, you may cannot circumvent those costs.</p>
+<h3>ip_finish_ouput</h3>
+<p>I'll put GSO and fragmentation handling aside at first, and concentrate on the traversal further down via <strong>ip_finish_ouput2.</strong></p>
+<p>In code:<a href="http://lxr.free-electrons.com/source/net/ipv4/ip_output.c#L287">/net/ipv4/ip_output.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+static int ip_finish_output(struct net <em>net, struct sock </em>sk, struct sk_buff *skb)
+{
+        unsigned int mtu;</p>
+<p>/<em>...</em>/
+        if (skb_is_gso(skb))
+                return ip_finish_output_gso(net, sk, skb, mtu);</p>
+<div class="highlight"><pre><span></span>    <span class="k">if</span> <span class="ss">(</span><span class="nv">skb</span><span class="o">-&gt;</span><span class="nv">len</span> <span class="o">&gt;</span> <span class="nv">mtu</span> <span class="o">||</span> <span class="ss">(</span><span class="nv">IPCB</span><span class="ss">(</span><span class="nv">skb</span><span class="ss">)</span><span class="o">-&gt;</span><span class="nv">flags</span> <span class="o">&amp;</span> <span class="nv">IPSKB_FRAG_PMTU</span><span class="ss">))</span>
+            <span class="k">return</span> <span class="nv">ip_fragment</span><span class="ss">(</span><span class="nv">net</span>, <span class="nv">sk</span>, <span class="nv">skb</span>, <span class="nv">mtu</span>, <span class="nv">ip_finish_output2</span><span class="ss">)</span><span class="c1">;</span>
+
+    <span class="k">return</span> <span class="nv">ip_finish_output2</span><span class="ss">(</span><span class="nv">net</span>, <span class="nv">sk</span>, <span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>}
+```</p>
+</blockquote>
+<h4>ip_finish_ouput2</h4>
+<p>Within here we're at the rim between neighboring and queueing discipline. <strong>dst_neigh_output</strong> is the positive case, when the neighboring cache is already filled with the next hop of our buffer.</p>
+<p>In code:<a href="http://lxr.free-electrons.com/source/net/ipv4/ip_output.c#L182">/net/ipv4/ip_output.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+static int ip_finish_output2(struct net <em>net, struct sock </em>sk, struct sk_buff <em>skb)
+{
+/</em>...*/
+        if (unlikely(!neigh))
+                neigh = __neigh_create(&amp;arp_tbl, &amp;nexthop, dev, false);
+        if (!IS_ERR(neigh)) {
+                int res = dst_neigh_output(dst, neigh, skb);</p>
+<div class="highlight"><pre><span></span>            <span class="nv">rcu_read_unlock_bh</span><span class="ss">()</span><span class="c1">;</span>
+            <span class="k">return</span> <span class="nv">res</span><span class="c1">;</span>
+    }
+</pre></div>
+
+
+<p>/<em>...</em>/
+        return -EINVAL;
+}
+```</p>
+</blockquote>
+<h4 - id="to" modules neighboring qdisc via>to qdisc - via neighboring modules</h4>
+<p>The generic interface to neighboring <strong>(ND or ARP)</strong> exposes <strong>dst_neigh_output.</strong> Following it's core lines of code:<strong><br>
+</strong></p>
+<blockquote>
+<p><code>{style="color:#000000;background:#ffffff;"}
+hh = &amp;n-&gt;hh;
+if ((n-&gt;nud_state &amp; NUD_CONNECTED) &amp;&amp; hh-&gt;hh_len)
+        return neigh_hh_output(hh, skb);
+else
+        return n-&gt;output(n, skb);</code></p>
+</blockquote>
+<p>Here you see, if the neighboring node is in connected state, the layer 2 destination header sections are fetched from a header cache. Else, depending on the neighboring protocol used and the state of the neighboring entry (<strong>NUD - neighbor unreachability detection</strong>) specific actions behind the generic handler <strong>n-&gt;output</strong> are carried out (e.g. neighbor node probing or resolution).</p>
+<p>Neighboring itself can be a difficile topic and is put out of scope of this post. Further, in high bandwidth network environment the tuning of neighboring is of marginal importance, because it's mostly constant O(1) cache filling cost is mainly paid only once when traffic is setting out and not incurred anymore later when the traffic is kept busy to the and from the node - the neighboring cache stays hot then.</p>
+<p>When you can afford to phase in neighboring based proxying in your environment, then the neighboring modules do pose a tuning knob for you, since the <strong>cost of routing</strong> would be alleviated by the need of only a minimalistic, rather symbolic routing table. But for most enterprise environments, that's not viable on a larger scale.</p>
+<p>Moreover, to pass packets further down, the neighboring module - in what state the entry may ever is - will eventually invoke <strong>dev_queue_xmit</strong>, which leads us to the queuing discipline network stack interface.</p>
+<h2 id="qdisc">Queuing Discipline (qdisc)</h2>
+<p>qdisc is the linux kernel network packet scheduling layer for Traffic Control purposes in between the NIC driver and the IP-Stack. It's composed of packet <strong>scheduling algorithms</strong> and its <strong>own queues</strong> apart from the driver ring buffers, but which are fed by the qdisc queues. The scheduling algorithms enqueue packets from other layers according their intention and thereby influence the transmission performance significantly.</p>
+<p>We can find qdisc on RX paths as well for policing purposes, but as this post focuses on the egress path, I won't shed light onto the RX mechanisms here.</p>
+<h3 Interplay Layer id="Higher">Higher Layer Interplay</h3>
+<h4 id="__dev_queue_xmit">__dev_queue_xmit</h4>
+<p>There's not much to say about <strong>dev_queue_xmit</strong> itself, it's simply wrapping <strong>__dev_queue_xmit</strong> for the sake of one acceleration context parameter.</p>
+<p>Approaching <strong>__dev_queue_xmit</strong> on the other hand, discerns if it's about to transmit over a <strong>queueless</strong> or <strong>queueful</strong> device. Most HW based NICs work based on queues. For specific sorts of devices, like tunnelling or virtual ones (good examples would be the loopback) a queue is technically superfluous since either simply not needed (e.g. for the loopback) or its pkt buffers are being taken care of by a queue of a queueful device somewhere else in the stack.</p>
+<p>In code: <a href="http://lxr.free-electrons.com/source/net/core/dev.c#L3316">/net/core/dev.c</a></p>
+<blockquote>
+<p>``` {#struct Qdisc style="color:#000000;background:#ffffff;"}
+static int __dev_queue_xmit(struct sk_buff <em>skb, void </em>accel_priv)
+{
+        struct net_device <em>dev = skb-&gt;dev;
+        struct netdev_queue </em>txq;
+        struct Qdisc <em>q;
+        int rc = -ENOMEM;
+/</em>...*/</p>
+<div class="highlight"><pre><span></span>    <span class="nv">txq</span> <span class="o">=</span> <span class="nv">netdev_pick_tx</span><span class="ss">(</span><span class="nv">dev</span>, <span class="nv">skb</span>, <span class="nv">accel_priv</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="nv">q</span> <span class="o">=</span> <span class="nv">rcu_dereference_bh</span><span class="ss">(</span><span class="nv">txq</span><span class="o">-&gt;</span><span class="nv">qdisc</span><span class="ss">)</span><span class="c1">;</span>
+
+    <span class="nv">trace_net_dev_queue</span><span class="ss">(</span><span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="k">if</span> <span class="ss">(</span><span class="nv">q</span><span class="o">-&gt;</span><span class="nv">enqueue</span><span class="ss">)</span> {
+            <span class="nv">rc</span> <span class="o">=</span> <span class="nv">__dev_xmit_skb</span><span class="ss">(</span><span class="nv">skb</span>, <span class="nv">q</span>, <span class="nv">dev</span>, <span class="nv">txq</span><span class="ss">)</span><span class="c1">;</span>
+            <span class="k">goto</span> <span class="nl">out</span><span class="c1">;</span>
+    }
+
+    <span class="cm">/* The device has no queue. Common case for software devices:</span>
+<span class="cm">       loopback, all the sorts of tunnels...</span>
+</pre></div>
+
+
+<p>...<em>/
+        if (dev-&gt;flags &amp; IFF_UP) {
+                int cpu = smp_processor_id(); /</em> ok because BHs are off */</p>
+<div class="highlight"><pre><span></span>            <span class="k">if</span> <span class="ss">(</span><span class="nv">txq</span><span class="o">-&gt;</span><span class="nv">xmit_lock_owner</span> <span class="o">!=</span> <span class="nv">cpu</span><span class="ss">)</span> {
+</pre></div>
+
+
+<p>/<em>...</em>/
+                        skb = validate_xmit_skb(skb, dev);
+                        if (!skb)
+                                goto out;</p>
+<div class="highlight"><pre><span></span>                    <span class="nv">HARD_TX_LOCK</span><span class="ss">(</span><span class="nv">dev</span>, <span class="nv">txq</span>, <span class="nv">cpu</span><span class="ss">)</span><span class="c1">;</span>
+
+                    <span class="k">if</span> <span class="ss">(</span><span class="o">!</span><span class="nv">netif_xmit_stopped</span><span class="ss">(</span><span class="nv">txq</span><span class="ss">))</span> {
+                            <span class="nv">__this_cpu_inc</span><span class="ss">(</span><span class="nv">xmit_recursion</span><span class="ss">)</span><span class="c1">;</span>
+                            <span class="nv">skb</span> <span class="o">=</span> <span class="nv">dev_hard_start_xmit</span><span class="ss">(</span><span class="nv">skb</span>, <span class="nv">dev</span>, <span class="nv">txq</span>, <span class="o">&amp;</span><span class="nv">rc</span><span class="ss">)</span><span class="c1">;</span>
+                            <span class="nv">__this_cpu_dec</span><span class="ss">(</span><span class="nv">xmit_recursion</span><span class="ss">)</span><span class="c1">;</span>
+                            <span class="k">if</span> <span class="ss">(</span><span class="nv">dev_xmit_complete</span><span class="ss">(</span><span class="nv">rc</span><span class="ss">))</span> {
+                                    <span class="nv">HARD_TX_UNLOCK</span><span class="ss">(</span><span class="nv">dev</span>, <span class="nv">txq</span><span class="ss">)</span><span class="c1">;</span>
+                                    <span class="k">goto</span> <span class="nl">out</span><span class="c1">;</span>
+                            }
+                    }
+                    <span class="nv">HARD_TX_UNLOCK</span><span class="ss">(</span><span class="nv">dev</span>, <span class="nv">txq</span><span class="ss">)</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>/<em>...</em>/
+        return rc;
+}
+```</p>
+</blockquote>
+<p>Then, it either forks into<strong>__dev_xmit_skb,</strong> when it's detecting a queueful device to transmit over - doing by checking if the qdisc enqueue callback does exist. Otherwise, it's phasing in a quasi direct transmit over a queueless device by <strong>dev_hard_start_xmit</strong> with first grabbing the lock on the outgoing queue for the driving CPU and clearing it after the transmission attempts. More on <a href="#dev_hard_start_xmit"><strong>dev_hard_start_xmit</strong></a> in the driver section.</p>
+<h4 id="__dev_xmit_skb"><strong>__dev_xmit_skb</strong></h4>
+<p>The main code paths there are framed by queue contention optimizations. More on queue contention in the driver section. Drilling it down, there are three important cases.</p>
+<p>In Code: <a href="http://lxr.free-electrons.com/source/net/core/dev.c#L3086">/net/core/dev.c</a></p>
+<ul>
+<li>In case the qdisc has been deactived on purpose, drop the packets.</li>
+</ul>
+<blockquote>
+<p><code>{style="color:#000000;background:#ffffff;"}
+if (unlikely(test_bit(__QDISC_STATE_DEACTIVATED, &amp;q-&gt;state))) {
+        __qdisc_drop(skb, &amp;to_free);
+        rc = NET_XMIT_DROP;
+}</code></p>
+</blockquote>
+<ul>
+<li>For certain qdisc, when no previous data has been queued in, we can do a direct transmission attempt without queuing it first in the qdisc.</li>
+</ul>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+else if ((q-&gt;flags &amp; TCQ_F_CAN_BYPASS) &amp;&amp; !qdisc_qlen(q) &amp;&amp;
+           qdisc_run_begin(q)) {
+        /<em>
+         * This is a work-conserving queue; there are no old skbs
+         * waiting to be sent out; and the qdisc is not running -
+         * xmit the skb directly.
+         </em>/</p>
+<div class="highlight"><pre><span></span>    <span class="nv">qdisc_bstats_update</span><span class="ss">(</span><span class="nv">q</span>, <span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+
+    <span class="k">if</span> <span class="ss">(</span><span class="nv">sch_direct_xmit</span><span class="ss">(</span><span class="nv">skb</span>, <span class="nv">q</span>, <span class="nv">dev</span>, <span class="nv">txq</span>, <span class="nv">root_lock</span>, <span class="nv">true</span><span class="ss">))</span> {
+            <span class="k">if</span> <span class="ss">(</span><span class="nv">unlikely</span><span class="ss">(</span><span class="nv">contended</span><span class="ss">))</span> {
+                    <span class="nv">spin_unlock</span><span class="ss">(</span><span class="o">&amp;</span><span class="nv">q</span><span class="o">-&gt;</span><span class="nv">busylock</span><span class="ss">)</span><span class="c1">;</span>
+                    <span class="nv">contended</span> <span class="o">=</span> <span class="nv">false</span><span class="c1">;</span>
+            }
+            <span class="nv">__qdisc_run</span><span class="ss">(</span><span class="nv">q</span><span class="ss">)</span><span class="c1">;</span>
+    } <span class="k">else</span>
+            <span class="nv">qdisc_run_end</span><span class="ss">(</span><span class="nv">q</span><span class="ss">)</span><span class="c1">;</span>
+
+    <span class="nv">rc</span> <span class="o">=</span> <span class="nv">NET_XMIT_SUCCESS</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>}
+```</p>
+</blockquote>
+<ul>
+<li>This is the "regular case", as it were. The packets are first handed over to the queuing discipline and therefore put under its discretion of scheduling and queuing the data. The actual transmission is driven by the TX softirq context at the next opportunity, initiated by <strong>__qdisc_run</strong>. For details about the <strong>__qdisc_run</strong> read on in this section.</li>
+</ul>
+<blockquote>
+<p><code>{style="color:#000000;background:#ffffff;"}
+else {
+        rc = q-&gt;enqueue(skb, q, &amp;to_free) &amp; NET_XMIT_MASK;
+        if (qdisc_run_begin(q)) {
+                if (unlikely(contended)) {
+                        spin_unlock(&amp;q-&gt;busylock);
+                        contended = false;
+                }
+                __qdisc_run(q);
+        }
+}</code></p>
+</blockquote>
+<h3 id="Core"><strong>Core Mechanisms</strong></h3>
+<p>Qdisc instances can be formed into sophisticated interrelations, mostly hierarchies, to implement complex Traffic Control needs. Here, I want to concentrate on the essentials of qdisc entities to unterstand it's workings for tuning needs.</p>
+<h4 Control Traffic id="generic" interface>generic Traffic Control interface</h4>
+<h4 and dequeue id="enqueue">enqueue and dequeue</h4>
+<p>You can see here the most important part of the Qdisc interface by which every qdisc implementation offers its specific scheduling logic: <strong>enqueue</strong> and <strong>dequeue</strong>.</p>
+<p>In Code: <a href="http://lxr.free-electrons.com/source/include/net/sch_generic.h#L47">/include/net/sch_generic.h</a></p>
+<blockquote>
+<p><code>{style="color:#000000;background:#ffffff;"}
+struct Qdisc {
+        int                     (*enqueue)(struct sk_buff *skb, struct Qdisc *dev);
+        struct sk_buff *        (*dequeue)(struct Qdisc *dev);
+/*...*/
+        struct Qdisc_ops        *ops;
+/*...*/
+        struct Qdisc            *__parent;
+        struct netdev_queue     *dev_queue;
+/*...*/
+}</code></p>
+</blockquote>
+<p>Either for putting skbs under its control or draining piled up skbs from previous TX runs from there. <strong>Every Qdisc</strong> instance is <strong>associated</strong> with a <strong>net_device</strong> by its <strong>queue</strong>, as you can see. The *<strong>__parent</strong> pointer gives evidence for the high nestability of Qdiscs. Internally, for realizing its logic, Qdisc might hold several virtual callback hubs with help of <strong><span style="color:#7f0055;">struct</span> Qdisc_ops *ops.</strong></p>
+<h4 and dev_requeue_skb id="requeue">requeue and dev_requeue_skb</h4>
+<p><strong>Requeuing</strong> has been optimized by taking skb out of qdisc only if really transmittable. In case the transmission attempt fails, the queue length is reincremented and the net_device is rescheduled for a further TX run on this CPU.</p>
+<p>In Code: <a href="http://lxr.free-electrons.com/source/net/sched/sch_generic.c#L48">/net/sched/sch_generic.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+static inline int dev_requeue_skb(struct sk_buff <em>skb, struct Qdisc </em>q)
+ {
+         q-&gt;gso_skb = skb;
+         q-&gt;qstats.requeues++;
+         qdisc_qstats_backlog_inc(q, skb);
+         q-&gt;q.qlen++;    /<em> it's still part of the queue </em>/
+         __netif_schedule(q);</p>
+<div class="highlight"><pre><span></span>     <span class="k">return</span> <span class="mi">0</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>}
+```</p>
+</blockquote>
+<p>In former kernel versions Qdisc instances used to have a <strong>requeue</strong> callback in their virtual interfaces.</p>
+<h4 id="__qdisc_run">__qdisc_run</h4>
+<p>When a device has been scheduled in for a transmission going over it, <strong>__qdisc_run is</strong> run in the <strong>TX NAPI code paths</strong> to dequeue the next skb meant for being transmited. At looking closer, we see <strong>qdisc_restart</strong> is actually doing the grunt work. More to <strong>disc_restart</strong> in the following section.</p>
+<p>That's the code of <a href="http://lxr.free-electrons.com/source/net/sched/sch_generic.c#L248">__qdisc_run</a>:</p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+int quota = weight_p;
+int packets;</p>
+<p>while (qdisc_restart(q, &amp;packets)) {
+        /<em>
+        * Ordered by possible occurrence: Postpone processing if
+        * 1. we've exceeded packet quota
+        * 2. another process needs the CPU;
+        </em>/
+        quota -= packets;
+        if (quota &lt;= 0 || need_resched()) {
+                __netif_schedule(q);
+                break;
+        }
+}</p>
+<p>qdisc_run_end(q);
+```</p>
+</blockquote>
+<p>You may remember the <a href="https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/#adjusting-the-netrxaction-budget"><strong>budget</strong> tuning on <strong>RX</strong> side</a> for the <strong>net_rx_action</strong> run by the RX NAPI loop for the RX softIRQ processing. The same setting is taking effect in a similar manner on the TX side as the packet <strong>quota</strong>. One can easily confirm that by following the <strong>weight_p</strong> global sysctl configuration variable to where it is exposed to the userland via the <a href="http://lxr.free-electrons.com/source/net/core/sysctl_net_core.c#L270"><strong>procFS</strong> interface for the networking core</a>:</p>
+<blockquote>
+<p><code>{#dev_weight style="color:#000000;background:#ffffff none repeat scroll 0 0;"}
+{
+        .procname       = "dev_weight",
+        .data           = &amp;weight_p,
+        .maxlen         = sizeof(int),
+        .mode           = 0644,
+        .proc_handler   = proc_dointvec
+},</code></p>
+</blockquote>
+<p>Therefore, it has absolutely the same value and it's the upper limit of queued packets one instance of a TX softIRQ loop can deal with transmitting out until it releases the device and it's queue and does reschedule the device further transmissions if needed. We are coming to that when a reschedule is deemed necessary int the subsection covering <strong>__netif_schedule</strong> itself.</p>
+<h4>qdisc_restart</h4>
+<p>In <a href="http://lxr.free-electrons.com/source/net/sched/sch_generic.c#L228">/net/sched/sch_generic.c</a>:</p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+struct netdev_queue <em>txq;
+struct net_device </em>dev;
+spinlock_t <em>root_lock;
+struct sk_buff </em>skb;
+bool validate;</p>
+<p>/<em> Dequeue packet </em>/
+skb = dequeue_skb(q, &amp;validate, packets);
+if (unlikely(!skb))
+        return 0;
+```</p>
+</blockquote>
+<p>First, previously queued socket buffers (packets) are fetched from the qdisc. I'm not accidentally using the plural here, <strong>dequeue_skb</strong> really can return a <strong>list of packets</strong>, depending on the behaviour of the current qdisc.</p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+root_lock = qdisc_lock(q);
+dev = qdisc_dev(q);
+txq = skb_get_tx_queue(dev, skb);</p>
+<p>return sch_direct_xmit(skb, q, dev, txq, root_lock, validate);
+```</p>
+</blockquote>
+<p>Then the device and its queue that are attached to the qdisc are determined. After that, <strong>qdisc_restart</strong> is phasing in a transmission attempt via the TX device and its queue.</p>
+<p>This is essentially how the queueing discipline is filled up and drained as transmission are ongoing via it. You also have a good idea now, where the qdisc and its mechanisms are located in the Linux TX network processing.</p>
+<h4 driver id="qdisc" multiple over queues>qdisc over multiple driver queues</h4>
+<p>As already stated, it's not purpose of this blog post to fully unveil the intrinsics of the exhaustive choice of qdiscs.</p>
+<p>Nevertheless, for high bandwidth egress the concept of multi queueing on driver and qdisc levels is essential. Justification enough to dive shallowly into <strong>multiq</strong>, the basic and from the netstack as a default overlay qdisc allocated mechanism, when multi qeueing on driver level is supported.</p>
+<p>For more complex multi queueing traffic control tasks, e.g. for flow steering to certain TX queues, take a look at <strong>mqprio</strong>.</p>
+<h4>multiq</h4>
+<p>The init code is trivial and as expected so I'll spare it: Key is, that multiq initializes a <strong>pfifo</strong> for every TX queue if there has not been a qdisc allocated to it yet. The per TX queue held qdisc buffers is adoptable in case of pure fifo. Consult <a href="http://tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.qdisc.html">LARTC</a> for details and the full varieties of choice.</p>
+<p><a href="http://lxr.free-electrons.com/source/net/sched/sch_multiq.c#L67">Enqueuing</a> works as with the targeted queue were a single queue with the multiq initiating the traffic control classification if present and further on framing the enqueuing into the sub queueing discipline with embedding it incontrol logic. Important: it does thereby <strong>not deteriorate XPS</strong> going abouts. Consult the <strong>XPS</strong> section of this post for more details.</p>
+<blockquote>
+<p><code>{style="color:#000000;background:#ffffff;"}
+        qdisc = multiq_classify(skb, sch, &amp;ret);
+/*...*/
+        ret = qdisc_enqueue(skb, qdisc, to_free);
+        if (ret == NET_XMIT_SUCCESS) {
+                sch-&gt;q.qlen++;
+                return NET_XMIT_SUCCESS;
+        }
+        if (net_xmit_drop_count(ret))
+                qdisc_qstats_drop(sch);
+        return ret;</code></p>
+</blockquote>
+<p><a href="http://lxr.free-electrons.com/source/net/sched/sch_multiq.c#L95">Dequeuing</a> does what stated in the <a href="https://linux.die.net/man/8/tc">man page</a>. <em>It will cycle though the bands and verify that the hardware queue associated with the band is not stopped prior to dequeuing a packet. It's meant to alleviate head of line blocking.<br>
+</em></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+struct multiq_sched_data <em>q = qdisc_priv(sch);
+struct Qdisc </em>qdisc;
+struct sk_buff *skb;
+int band;</p>
+<p>for (band = 0; band &lt; q-&gt;bands; band++) {
+        /<em> cycle through bands to ensure fairness </em>/
+        q-&gt;curband++;
+        if (q-&gt;curband &gt;= q-&gt;bands)
+                q-&gt;curband = 0;</p>
+<div class="highlight"><pre><span></span>    <span class="cm">/* Check that target subqueue is available before</span>
+<span class="cm">     * pulling an skb to avoid head-of-line blocking.</span>
+<span class="cm">     */</span>
+    <span class="k">if</span> <span class="ss">(</span><span class="o">!</span><span class="nv">netif_xmit_stopped</span><span class="ss">(</span>
+        <span class="nv">netdev_get_tx_queue</span><span class="ss">(</span><span class="nv">qdisc_dev</span><span class="ss">(</span><span class="nv">sch</span><span class="ss">)</span>, <span class="nv">q</span><span class="o">-&gt;</span><span class="nv">curband</span><span class="ss">)))</span> {
+            <span class="nv">qdisc</span> <span class="o">=</span> <span class="nv">q</span><span class="o">-&gt;</span><span class="nv">queues</span>[<span class="nv">q</span><span class="o">-&gt;</span><span class="nv">curband</span>]<span class="c1">;</span>
+            <span class="nv">skb</span> <span class="o">=</span> <span class="nv">qdisc</span><span class="o">-&gt;</span><span class="nv">dequeue</span><span class="ss">(</span><span class="nv">qdisc</span><span class="ss">)</span><span class="c1">;</span>
+            <span class="k">if</span> <span class="ss">(</span><span class="nv">skb</span><span class="ss">)</span> {
+                    <span class="nv">qdisc_bstats_update</span><span class="ss">(</span><span class="nv">sch</span>, <span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+                    <span class="nv">sch</span><span class="o">-&gt;</span><span class="nv">q</span>.<span class="nv">qlen</span><span class="o">--</span><span class="c1">;</span>
+                    <span class="k">return</span> <span class="nv">skb</span><span class="c1">;</span>
+            }
+    }
+</pre></div>
+
+
+<p>}
+return NULL;
+```</p>
+</blockquote>
+<p>Whereby a <strong>band</strong> is a one of the multiple TX queues and its associated qdisc.</p>
+<h3 id="Monitoring">Monitoring</h3>
+<h4 Control Linux Traffic id="Using">Using Linux Traffic Control</h4>
+<p>For interacting with the Qeueing Discipline and its Traffic Control mechanisms from userland, there is a tool called <strong>tc (man 8 tc)</strong>.</p>
+<blockquote>
+<p><strong>linux:\~\$</strong> tc -s -d qdisc show dev enp2s0<br>
+<strong>qdisc</strong> <strong>pfifo_fast</strong> 0: root refcnt 2 bands 3 priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1<br>
+Sent 52084489 bytes 434946 pkt (<strong>dropped</strong> 0, <strong>overlimits</strong> 0 <strong>requeues</strong> 27)<br>
+<strong>backlog</strong> 0b 0p <strong>requeues</strong> 27<strong><br>
+</strong></p>
+</blockquote>
+<p>Explanation of relevant fields:</p>
+<ul>
+<li><strong>qdisc</strong> <strong>pfifo_fast</strong>: the current queueing discipline for the queried device. <strong>pfifo_fast</strong> as default for single queued devices.</li>
+<li><strong>dropped:</strong> dropped buffers by qdisc because of algorithm decided to or the qdisc queue length has been exceeded</li>
+<li><strong>overlimits:</strong> depends on capabilities of qdisc: if it is doing traffic shaping, then the number of the current send limit having been reached by upper layers</li>
+<li><strong>requeues:</strong> supposed to be transmissions being reenqueued since of driver reporting it cannot transmit or take more TX for time being</li>
+<li><strong>backlog:</strong> bytes | buffers currently enqueued in qdisc<strong><br>
+</strong></li>
+</ul>
+<p>Consult <a href="http://tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.qdisc.html">LARTC</a> for details of further output.</p>
+<h3 id="Tuning">Tuning</h3>
+<h4 id="choosing" proper qdisc>choosing proper qdisc</h4>
+<p>I cannot and won't cover every aspect of qdisc algorithms and which one to choose when, because that's highly environment and purpose or traffic outline dependent. A good start is the <a href="http://tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.qdisc.html">LARTC</a> docs. Further, there has been done some brilliantly tangible research (<a href="http://www.sciencedirect.com/science/article/pii/S1389128615002479">The Good, the Bad and the WiFi: Modern AQMs in a residential setting</a>) into certain aspects of qdiscs related to <a href="https://www.bufferbloat.net/projects/">buffer bloat</a> and thereby induced latency quite recently. Although, these comparisons were focused on residential devices mainly, it should provide you with some additional pointers as to what qdisc to go for first when looking for prime performance.</p>
+<p>Example for replacing for an iface the default qdisc <strong>pfifo_fast</strong> with a <strong>fq_codel</strong>:</p>
+<blockquote>
+<div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">tc</span> <span class="n">qdisc</span> <span class="k">replace</span> <span class="n">dev</span> <span class="o">&lt;</span><span class="n">your_dev</span><span class="o">&gt;</span> <span class="n">root</span> <span class="n">fq_codel</span>
+</pre></div>
+
+
+</blockquote>
+<p>For exchanging the leaf qdiscs of a multi queueing qdisc you can first adopt the default qdisc set for your net stack by:</p>
+<blockquote>
+<div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">sysctl</span> <span class="o">-</span><span class="n">w</span> <span class="n">net</span><span class="p">.</span><span class="n">core</span><span class="p">.</span><span class="n">default_qdisc</span><span class="o">=</span><span class="n">fq_codel</span>
+</pre></div>
+
+
+</blockquote>
+<p>After resetting the root mq qdisc for your iface, the previously set default qdisc is in place for every leaf in the mq qdisc:</p>
+<blockquote>
+<div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">tc</span> <span class="n">qdisc</span> <span class="k">replace</span> <span class="n">dev</span> <span class="o">&lt;</span><span class="n">your_dev</span><span class="o">&gt;</span> <span class="n">root</span> <span class="n">mq</span>
+</pre></div>
+
+
+</blockquote>
+<p>You can simply verify by doing:</p>
+<blockquote>
+<div class="highlight"><pre><span></span># <span class="nv">tc</span> <span class="o">-</span><span class="nv">s</span> <span class="nv">qdisc</span> <span class="k">show</span> <span class="o">&lt;</span><span class="nv">your_dev</span><span class="o">&gt;</span>
+</pre></div>
+
+
+</blockquote>
+<h4 draining id="tweaking" qdisc>tweaking qdisc draining</h4>
+<p>When you see numerous dropping and a high backlog, that might be an indicator that your TX stack paths may profit from a higher draining flux.</p>
+<ul>
+<li><strong>cpu proportion spent on TX processing<br>
+</strong></li>
+</ul>
+<!-- -->
+
+<ul>
+<li>this sysctl paramater was already made acquaintend for <a href="https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/#tuning-adjust-the-napi-weight-of-the-backlog-poll-loop">RX paths</a></li>
+<li>it has the same value as there when set for <a href="#dev_weight">TX paths NAPI</a> (quota) processing<ul>
+<li>NB: raising it has <strong>side effects</strong> for RX path NAPI processing and vice versa</li>
+</ul>
+</li>
+</ul>
+<p>Adjusting the value:</p>
+<blockquote>
+<div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">sysctl</span> <span class="o">-</span><span class="n">w</span> <span class="n">net</span><span class="p">.</span><span class="n">core</span><span class="p">.</span><span class="n">dev_weight</span><span class="o">=</span><span class="mi">900</span>
+</pre></div>
+
+
+</blockquote>
+<ul>
+<li><strong>XPS</strong><ul>
+<li>in SMP processor based systems with drivers supporting multi queuing, it can increase the outflux from qdisc by alleviating <strong>CPU contention</strong> for the <strong>TX queues</strong> and driver rings and further the need for qdisc reenqueuings as a symptom of high contention. Additionally, it increases the skb <strong>cache locality</strong> and therefore the <strong>cache hit ratio</strong> for network processing of the transmitting CPUs. More in the <a href="#xps">driver section</a>.</li>
+</ul>
+</li>
+</ul>
+<h4 id="qdisc" limit>qdisc limit</h4>
+<p>If it's setable and improving things is qdisc dependend. Further, what is the cause for a high backlog or dropping might be more importantly to fix than the length of the qdisc. Additionally, increasing the length may even deteriorate things by <a href="https://www.coverfire.com/articles/queueing-in-the-linux-network-stack/">spuring buffer bloat</a>.</p>
+<p>Though, in certain cases of high transmission rates, you might want your packets rather buffered than retransmitted by higher layers when high dropping is showing by querying your qdisc with tc.</p>
+<p>Qdiscs have it set in different ways. For the default allocated qdisc <strong>pfifo_fast</strong> with default length 1000 you have to do it with iproute2:</p>
+<blockquote>
+<p># ip link set enp2s0 txqueuelen 1200</p>
+</blockquote>
+<p>Checking qdisc length:</p>
+<blockquote>
+<p>\$ ip l</p>
+<p>1: enp2s0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc <strong>pfifo_fast</strong> state UP mode DEFAULT group default <strong>qlen 1200</strong><br>
+link/ether fc:aa:14:1c:5d:ea brd ff:ff:ff:ff:ff:ff</p>
+</blockquote>
+<h1 id="device" subsystem>Linux network device subsystem</h1>
+<p>After having learned where the queuing discipline is located and how it knobs together higher layers and the network device driver level, we'll peruse through the transmission model based on the NAPI - which you are already aware of from the RX guide.</p>
+<h2 Device _="/" contract driver id="NAPI">NAPI / Device driver contract</h2>
+<h3 device id="egress" scheduling>egress device scheduling</h3>
+<h4 id="__netif_schedule">__netif_schedule</h4>
+<p>When introducing the qdisc components of the kernel, we referenced <strong>__netif_schedule</strong> the first time. Its purpose is to register a net device seen eligible for being egress processed by a CPU.</p>
+<p>Actually, <strong>__netif_schedule</strong> is only checking if the qdisc queue has already been scheduled, if not, <strong>__netif_reschedule</strong> kicks in: it does the actual NAPI egress registration.</p>
+<p>Refer to: <a href="http://lxr.free-electrons.com/source/net/core/dev.c#L2254">/net/core/dev.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+struct softnet_data *sd;
+unsigned long flags;</p>
+<p>local_irq_save(flags);
+sd = &amp;__get_cpu_var(softnet_data);
+q-&gt;next_sched = NULL;
+*sd-&gt;output_queue_tailp = q;
+sd-&gt;output_queue_tailp = &amp;q-&gt;next_sched;
+raise_softirq_irqoff(NET_TX_SOFTIRQ);
+local_irq_restore(flags);
+```</p>
+</blockquote>
+<p>The steps it takes mainly are:</p>
+<ul>
+<li>fetch the per CPU <strong>softnet_data</strong> structure</li>
+<li>links the <strong>Qdisc *q</strong> into the per CPU <strong>output_queue</strong> as part of <strong>softnet_data</strong></li>
+<li>register a TX softirq loop run with <strong>raise_softirq_irqoff</strong> for the current CPU</li>
+</ul>
+<p>Further, the <strong>output_queue</strong> is consequently the queue of devices, that have something to transmit and have to be handled by the future hereby registered NAPI softirq loop runs.</p>
+<h4 id="__dev_kfree_skb_irq">__dev_kfree_skb_irq</h4>
+<p>You may have noticed that the driver mainly runs in interrupt context, and we it's commonplace know fact that code path in interrupt context have to be as quick as possible. As a consequence, the driver is not wasting time for releasing transmitted packets. The driver only links in skb ptr to a per CPU <strong>completion_queue</strong>, that is part of the <strong>softnet_data</strong> per CPU data structure.</p>
+<p>In code <a href="http://lxr.free-electrons.com/source/net/core/dev.c#L2331">/net/core/dev.c</a>:</p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff none repeat scroll 0 0;"}
+void __dev_kfree_skb_irq(struct sk_buff <em>skb, enum skb_free_reason reason)
+{
+/</em>...*/</p>
+<div class="highlight"><pre><span></span>    <span class="nv">get_kfree_skb_cb</span><span class="ss">(</span><span class="nv">skb</span><span class="ss">)</span><span class="o">-&gt;</span><span class="nv">reason</span> <span class="o">=</span> <span class="nv">reason</span><span class="c1">;</span>
+    <span class="nv">local_irq_save</span><span class="ss">(</span><span class="nv">flags</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="nv">skb</span><span class="o">-&gt;</span><span class="k">next</span> <span class="o">=</span> <span class="nv">__this_cpu_read</span><span class="ss">(</span><span class="nv">softnet_data</span>.<span class="nv">completion_queue</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="nv">__this_cpu_write</span><span class="ss">(</span><span class="nv">softnet_data</span>.<span class="nv">completion_queue</span>, <span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="nv">raise_softirq_irqoff</span><span class="ss">(</span><span class="nv">NET_TX_SOFTIRQ</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="nv">local_irq_restore</span><span class="ss">(</span><span class="nv">flags</span><span class="ss">)</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>}
+```</p>
+</blockquote>
+<p>Cleaning up is then done by the softirq processing loop in uncritical non-interrupt context. Notice, that its the same softirq loop to handle as for the egress transmission processing, namely <strong>NET_TX_SOFTIRQ</strong>. Details are given further down.<strong><br>
+</strong></p>
+<h3 id="TX" processing softirq>TX softirq processing</h3>
+<p>Now we know enough for approaching the core of the TX softirq loop triggered by <strong>NET_TX_SOFTIRQ.</strong></p>
+<h3 data id="egress" loop processing>egress data processing loop</h3>
+<p>The core handler for the egress processing is <strong>net_tx_action</strong>. It's covering two main cases.</p>
+<p>Reference to code: <a href="http://lxr.free-electrons.com/source/net/core/dev.c#L3844">/net/core/dev.c</a></p>
+<ul>
+<li>cleaning up already transmitted skb instances<ul>
+<li>here you can see the <strong>completion_queue</strong> resurface again</li>
+<li>the rest is about freeing of skb held kernel memory</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+struct softnet_data *sd = this_cpu_ptr(&amp;softnet_data);</p>
+<div class="highlight"><pre><span></span>    <span class="k">if</span> <span class="ss">(</span><span class="nv">sd</span><span class="o">-&gt;</span><span class="nv">completion_queue</span><span class="ss">)</span> {
+            <span class="nv">struct</span> <span class="nv">sk_buff</span> <span class="o">*</span><span class="nv">clist</span><span class="c1">;</span>
+
+            <span class="nv">local_irq_disable</span><span class="ss">()</span><span class="c1">;</span>
+            <span class="nv">clist</span> <span class="o">=</span> <span class="nv">sd</span><span class="o">-&gt;</span><span class="nv">completion_queue</span><span class="c1">;</span>
+            <span class="nv">sd</span><span class="o">-&gt;</span><span class="nv">completion_queue</span> <span class="o">=</span> <span class="nv">NULL</span><span class="c1">;</span>
+            <span class="nv">local_irq_enable</span><span class="ss">()</span><span class="c1">;</span>
+
+            <span class="k">while</span> <span class="ss">(</span><span class="nv">clist</span><span class="ss">)</span> {
+                    <span class="nv">struct</span> <span class="nv">sk_buff</span> <span class="o">*</span><span class="nv">skb</span> <span class="o">=</span> <span class="nv">clist</span><span class="c1">;</span>
+                    <span class="nv">clist</span> <span class="o">=</span> <span class="nv">clist</span><span class="o">-&gt;</span><span class="k">next</span><span class="c1">;</span>
+
+                    <span class="nv">WARN_ON</span><span class="ss">(</span><span class="nv">atomic_read</span><span class="ss">(</span><span class="o">&amp;</span><span class="nv">skb</span><span class="o">-&gt;</span><span class="nv">users</span><span class="ss">))</span><span class="c1">;</span>
+                    <span class="k">if</span> <span class="ss">(</span><span class="nv">likely</span><span class="ss">(</span><span class="nv">get_kfree_skb_cb</span><span class="ss">(</span><span class="nv">skb</span><span class="ss">)</span><span class="o">-&gt;</span><span class="nv">reason</span> <span class="o">==</span> <span class="nv">SKB_REASON_CONSUMED</span><span class="ss">))</span>
+                            <span class="nv">trace_consume_skb</span><span class="ss">(</span><span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+                    <span class="k">else</span>
+                            <span class="nv">trace_kfree_skb</span><span class="ss">(</span><span class="nv">skb</span>, <span class="nv">net_tx_action</span><span class="ss">)</span><span class="c1">;</span>
+
+                    <span class="k">if</span> <span class="ss">(</span><span class="nv">skb</span><span class="o">-&gt;</span><span class="nv">fclone</span> <span class="o">!=</span> <span class="nv">SKB_FCLONE_UNAVAILABLE</span><span class="ss">)</span>
+                            <span class="nv">__kfree_skb</span><span class="ss">(</span><span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+                    <span class="k">else</span>
+                            <span class="nv">__kfree_skb_defer</span><span class="ss">(</span><span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+            }
+
+            <span class="nv">__kfree_skb_flush</span><span class="ss">()</span><span class="c1">;</span>
+    }
+</pre></div>
+
+
+<p>```</p>
+</blockquote>
+<ul>
+<li>transmitting packets by processing devices that have been registered for having something to transmit<ul>
+<li>the previously <strong>output_queue</strong> is consulted here to decide on what device to schedule in for processing next</li>
+<li>then the <strong>qdisc_run</strong> ushers in packet transmission via the <strong>qeueing discipline</strong> interface</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+if (sd-&gt;output_queue) {
+                struct Qdisc *head;</p>
+<div class="highlight"><pre><span></span>            <span class="nv">local_irq_disable</span><span class="ss">()</span><span class="c1">;</span>
+            <span class="nv">head</span> <span class="o">=</span> <span class="nv">sd</span><span class="o">-&gt;</span><span class="nv">output_queue</span><span class="c1">;</span>
+            <span class="nv">sd</span><span class="o">-&gt;</span><span class="nv">output_queue</span> <span class="o">=</span> <span class="nv">NULL</span><span class="c1">;</span>
+            <span class="nv">sd</span><span class="o">-&gt;</span><span class="nv">output_queue_tailp</span> <span class="o">=</span> <span class="o">&amp;</span><span class="nv">sd</span><span class="o">-&gt;</span><span class="nv">output_queue</span><span class="c1">;</span>
+            <span class="nv">local_irq_enable</span><span class="ss">()</span><span class="c1">;</span>
+
+            <span class="k">while</span> <span class="ss">(</span><span class="nv">head</span><span class="ss">)</span> {
+                    <span class="nv">struct</span> <span class="nv">Qdisc</span> <span class="o">*</span><span class="nv">q</span> <span class="o">=</span> <span class="nv">head</span><span class="c1">;</span>
+                    <span class="nv">spinlock_t</span> <span class="o">*</span><span class="nv">root_lock</span><span class="c1">;</span>
+
+                    <span class="nv">head</span> <span class="o">=</span> <span class="nv">head</span><span class="o">-&gt;</span><span class="nv">next_sched</span><span class="c1">;</span>
+
+                    <span class="nv">root_lock</span> <span class="o">=</span> <span class="nv">qdisc_lock</span><span class="ss">(</span><span class="nv">q</span><span class="ss">)</span><span class="c1">;</span>
+                    <span class="nv">spin_lock</span><span class="ss">(</span><span class="nv">root_lock</span><span class="ss">)</span><span class="c1">;</span>
+                    <span class="cm">/* We need to make sure head-&gt;next_sched is read</span>
+<span class="cm">                     * before clearing __QDISC_STATE_SCHED</span>
+<span class="cm">                     */</span>
+                    <span class="nv">smp_mb__before_atomic</span><span class="ss">()</span><span class="c1">;</span>
+                    <span class="nv">clear_bit</span><span class="ss">(</span><span class="nv">__QDISC_STATE_SCHED</span>, <span class="o">&amp;</span><span class="nv">q</span><span class="o">-&gt;</span><span class="nv">state</span><span class="ss">)</span><span class="c1">;</span>
+                    <span class="nv">qdisc_run</span><span class="ss">(</span><span class="nv">q</span><span class="ss">)</span><span class="c1">;</span>
+                    <span class="nv">spin_unlock</span><span class="ss">(</span><span class="nv">root_lock</span><span class="ss">)</span><span class="c1">;</span>
+            }
+    }
+</pre></div>
+
+
+<p>```</p>
+</blockquote>
+<p>One may noticed, that the next net device for transmission is taken from the tail of the output_queue, what may not always be the necessarly fairest approach among the devices.</p>
+<h1 Device Driver id="Network">Network Device Driver</h1>
+<p>Same here, I'm under the impression, that the essentials were well depicted at the RX guide when it comes to the Net Device Drivers, so I'll mainly focus on what is specific for the TX side of the stack in this area.</p>
+<h2 Interplay Layer id="Upper">Upper Layer Interplay</h2>
+<h3>sch_direct_xmit</h3>
+<p>This function forms the driver feedback reaction framing around the transmission processing. It's transmitting several buffers and gives feedback of the device state after every transmit.</p>
+<p>In Code: <a href="http://lxr.free-electrons.com/source/net/sched/sch_generic.c">/net/sched/sch_generic.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+/<em> And release qdisc </em>/
+spin_unlock(root_lock);</p>
+<p>/<em>...</em>/</p>
+<p>if (likely(skb)) {
+        HARD_TX_LOCK(dev, txq, smp_processor_id());
+        if (!netif_xmit_frozen_or_stopped(txq))
+                skb = dev_hard_start_xmit(skb, dev, txq, &amp;ret);</p>
+<div class="highlight"><pre><span></span>    <span class="n">HARD_TX_UNLOCK</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="n">txq</span><span class="p">);</span>
+</pre></div>
+
+
+<p>} else {
+        spin_lock(root_lock);
+        return qdisc_qlen(q);
+}
+spin_lock(root_lock);
+```</p>
+</blockquote>
+<ul>
+<li>Requeuing has already been introdiced further up. Here, you its application. Every time the device reports, it cannot send anymore - may it be because its busy or for some other reason, then left overs are being requeued to the qdisc.</li>
+</ul>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+if (dev_xmit_complete(ret)) {
+        /<em> Driver sent out skb successfully or skb was consumed </em>/
+        ret = qdisc_qlen(q);
+} else {
+        /<em> Driver returned NETDEV_TX_BUSY - requeue skb </em>/
+        if (unlikely(ret != NETDEV_TX_BUSY))
+                net_warn_ratelimited("BUG %s code %d qlen %d\n",
+                                     dev-&gt;name, ret, q-&gt;q.qlen);</p>
+<div class="highlight"><pre><span></span>    <span class="n">ret</span> <span class="o">=</span> <span class="n">dev_requeue_skb</span><span class="p">(</span><span class="n">skb</span><span class="p">,</span> <span class="n">q</span><span class="p">);</span>
+</pre></div>
+
+
+<p>}</p>
+<p>if (ret &amp;&amp; netif_xmit_frozen_or_stopped(txq))
+        ret = 0;</p>
+<p>return ret;
+```</p>
+</blockquote>
+<h3>dev_hard_start_xmit</h3>
+<p>Here you can see the loop where single buffers are passed further to the hands of the driver via xmit_one.</p>
+<p>Code Reference: <a href="http://lxr.free-electrons.com/source/net/core/dev.c#L2920">/net/core/dev.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+struct sk_buff *skb = first;
+        int rc = NETDEV_TX_OK;</p>
+<div class="highlight"><pre><span></span>    <span class="k">while</span> <span class="ss">(</span><span class="nv">skb</span><span class="ss">)</span> {
+            <span class="nv">struct</span> <span class="nv">sk_buff</span> <span class="o">*</span><span class="k">next</span> <span class="o">=</span> <span class="nv">skb</span><span class="o">-&gt;</span><span class="k">next</span><span class="c1">;</span>
+
+            <span class="nv">skb</span><span class="o">-&gt;</span><span class="k">next</span> <span class="o">=</span> <span class="nv">NULL</span><span class="c1">;</span>
+            <span class="nv">rc</span> <span class="o">=</span> <span class="nv">xmit_one</span><span class="ss">(</span><span class="nv">skb</span>, <span class="nv">dev</span>, <span class="nv">txq</span>, <span class="k">next</span> <span class="o">!=</span> <span class="nv">NULL</span><span class="ss">)</span><span class="c1">;</span>
+            <span class="k">if</span> <span class="ss">(</span><span class="nv">unlikely</span><span class="ss">(</span><span class="o">!</span><span class="nv">dev_xmit_complete</span><span class="ss">(</span><span class="nv">rc</span><span class="ss">)))</span> {
+                    <span class="nv">skb</span><span class="o">-&gt;</span><span class="k">next</span> <span class="o">=</span> <span class="k">next</span><span class="c1">;</span>
+                    <span class="k">goto</span> <span class="nl">out</span><span class="c1">;</span>
+            }
+
+            <span class="nv">skb</span> <span class="o">=</span> <span class="k">next</span><span class="c1">;</span>
+            <span class="k">if</span> <span class="ss">(</span><span class="nv">netif_xmit_stopped</span><span class="ss">(</span><span class="nv">txq</span><span class="ss">)</span> <span class="o">&amp;&amp;</span> <span class="nv">skb</span><span class="ss">)</span> {
+                    <span class="nv">rc</span> <span class="o">=</span> <span class="nv">NETDEV_TX_BUSY</span><span class="c1">;</span>
+                    <span class="k">break</span><span class="c1">;</span>
+            }
+    }
+</pre></div>
+
+
+<p>```</p>
+</blockquote>
+<p>xmit_one gives with <strong>dev_queue_xmit_nit</strong> a copy of the skb to every tap registered in the path and then phases in the final hand over of the buffer to the driver egress mechanisms by invoking <strong>netdev_start_xmit</strong>.</p>
+<p>In Code: <a href="http://lxr.free-electrons.com/source/net/core/dev.c#L2903">/net/core/dev.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+if (!list_empty(&amp;ptype_all) || !list_empty(&amp;dev-&gt;ptype_all))
+        dev_queue_xmit_nit(skb, dev);</p>
+<p>len = skb-&gt;len;
+trace_net_dev_start_xmit(skb, dev);
+rc = netdev_start_xmit(skb, dev, txq, more);
+trace_net_dev_xmit(skb, rc, dev, len);
+```</p>
+</blockquote>
+<h3 driver handover id="actual">actual driver handover</h3>
+<h4>netdev_start_xmit</h4>
+<p>Egress processing is now culminating into driver realms.</p>
+<p>Code ref: <a href="http://lxr.free-electrons.com/source/include/linux/netdevice.h#L4050">/include/linux/netdevice.h</a></p>
+<ol>
+<li>the virtual interface <strong>dev-&gt;netdev_ops</strong> of the driver is fetched</li>
+</ol>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+const struct net_device_ops *ops = dev-&gt;netdev_ops;
+int rc;</p>
+<p>rc = __netdev_start_xmit(ops, skb, dev, more);
+if (rc == NETDEV_TX_OK)
+        txq_trans_update(txq);
+```</p>
+</blockquote>
+<ul>
+<li>and used for the skb handover in <strong>__netdev_start_xmit<br>
+</strong>to access the driver callback <strong>ndo_start_xmit</strong></li>
+</ul>
+<blockquote>
+<p><code>{style="color:#000000;background:#ffffff;"}
+skb-&gt;xmit_more = more ? 1 : 0;
+return ops-&gt;ndo_start_xmit(skb, dev);</code></p>
+</blockquote>
+<p>From now on all processing is driver specific. The egress core from now on only has a reactive role to feedback given by drivers. How the tx-rings (driver queues) are maintained and handled is therefore driver specific code. The association between flow and driver tx-ring is drawn from the skb passed over. The skb keeps the ring index in its context.</p>
+<h4><strong>processing feedback</strong></h4>
+<p>The kernel is relying on feedback from the driver to react appropriately to its transmission attempts:</p>
+<ul>
+<li><strong>NETDEV_TX_OK</strong>: transmission was successfully taken over by driver</li>
+<li><strong>NETDEV_TX_BUSY</strong>: driver tx buffer ring exhausted and therefore cannot take over further data</li>
+<li><strong>NETDEV_TX_LOCKED</strong>: driver is locked by other CPU - (not for kernels &gt;4.9) reported for drivers who support own locking (feature <strong>NETIF_F_LLTX)</strong></li>
+</ul>
+<p><strong>NETDEV_TX_BUSY</strong> and <strong>NETDEV_TX_LOCKED</strong> require buffers being <strong>reenqued</strong> into qdisc queues.</p>
+<h3 id="driver" queues>driver queues</h3>
+<p>As seen on the RX paths, the driver keeps queues for buffering skb instances before actioning those. That's because the device is working asynchronously from the rest of the stack and by buffering assigned work the rest of the stack further up does not have to block for awaiting the device to finish its work.</p>
+<h4 egress id="multiple" queues>multiple egress queues</h4>
+<p>There is held at least one queue per device by the drivers in case it's a queueful device.</p>
+<h4><strong>locking</strong></h4>
+<p>It is important to understand that there has to be some form of locking implemented for accessing a queue in case there are more CPUs than queues to prevent races for the then shared resource.</p>
+<p>Many CPUs accessing fewer queues may lead to a egress performance degrading high <strong>cpu contention</strong>.</p>
+<p>For <strong>kernels &lt;4.9</strong> contention is visible in the procFS as dump of the per CPU <code>struct softnet_data</code> as outlined in <a href="https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/#monitoring-network-data-processing">RX blog</a>. It's the ninth value represented,<code class="language-c">sd-&gt;cpu_collision.</code>This counter shows the number of CPU collisions having occurred up to now, but only if the driver supports its own locking. The driver indicates that by the feature flag <strong>NETIF_F_LLTX</strong>. Collisions in the sense of how often CPUs have tried and failed send via a device while the device was already held busy by another transmitting CPU. For later kernels, this counter has been made unused and always shows zero, since <strong>NETIF_F_LLTX</strong> has been declared as a deprecated driver feature. You can also infer the frequency of collisions from the number of reenqueuing occurrences further up in the stack in the qdisc statistics - but it's rather hidden, since reenqueuing does not only occurr since of lock contentions.</p>
+<p>Noteworthy is, there are two main locks related to transmitting. First the qdisc lock which does not lead to a collision, since it's implemented as a spin lock. If the qdisc is being locked at the moment by a CPU, further CPUs wait actively until the holder releases the lock.</p>
+<ul>
+<li><strong>spin_lock(root_lock)</strong> is noticeable in __dev_xmit_skb and qdisc_restart introced further up</li>
+<li>it's released as soon as egress code paths are approaching the driver lock, e.g. <strong><em>*sch_direct_xmit as</em>* spin_unlock(root_lock)</strong>, so to confine locking for qdisc to a absolutely needed minimum until driver lock is held: interleaved locking so to speak</li>
+</ul>
+<p>In former kernels, if the driver supports <strong>NETIF_F_LLTX</strong> and the driver is locked by a CPU, further contending for it leads to a collision by returning <strong>NETDEV_TX_LOCKED</strong>, requeuing the colliding CPUs outgoing skbs in the qdisc queue an retrying it in a future rescheduled TX softIRQ loop.</p>
+<p>In <strong>sch_direct_xmit</strong> you can investigate the driver locking macros:</p>
+<ul>
+<li><strong>HARD_TX_LOCK</strong></li>
+<li><strong>HARD_TX_UNLOCK</strong></li>
+</ul>
+<p>Those are setting a spinlock protected per tx queue cpu reservation flag, or leave locking work to the driver in case <strong>NETIF_F_LLTX</strong> supported</p>
+<p>That says: for drivers not supporting <strong>NETIF_F_LLTX</strong>, all driver locking is done by the kernel by active locking.</p>
+<p>Collisions in whatever form or interpretation are worthwile to alleviate. A perfect means is to fully do away with collision in whatever form since of driver contention is giving each CPU it's own egress queue(s) - see next section.</p>
+<h4 id="xps">Transmit Packet Steering - XPS</h4>
+<p>A means to tackle high <strong>cpu contention</strong> is a kernel mechanism called <strong>XPS</strong>. It can reduce the contention occurrences by allocating certain CPUs to certain queues. In the ideal case, when there are at least as many queues as CPUs present, every CPU thereby does get its own queue(s) allocated and sufferings from contention overhead is cut down to zero. There are quite some drivers around, which handle their own egress queue picking and thereby overrule XPS.  Equally important is the feature of XPS to increase the cache locality of packets to be sent to the cache hierachary of the actually sending CPU. In case there are several CPUs with different cache hierarchies available in your system, it goes without saying that it makes the most sense to share queues amongst CPUs which are also sharing the same cache hierarchy.</p>
+<p><strong>netdev_pick_tx</strong> consulted in __<strong>dev_queue_xmit</strong>, deals with the actual TX queue selection: <a href="http://lxr.free-electrons.com/source/net/core/dev.c#netdev_pick_tx">/net/core/dev.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff none repeat scroll 0 0;"}
+int queue_index = 0;</p>
+<p>/<em>...</em>/</p>
+<div class="highlight"><pre><span></span>    <span class="k">if</span> <span class="ss">(</span><span class="nv">dev</span><span class="o">-&gt;</span><span class="nv">real_num_tx_queues</span> <span class="o">!=</span> <span class="mi">1</span><span class="ss">)</span> {
+            <span class="nv">const</span> <span class="nv">struct</span> <span class="nv">net_device_ops</span> <span class="o">*</span><span class="nv">ops</span> <span class="o">=</span> <span class="nv">dev</span><span class="o">-&gt;</span><span class="nv">netdev_ops</span><span class="c1">;</span>
+            <span class="k">if</span> <span class="ss">(</span><span class="nv">ops</span><span class="o">-&gt;</span><span class="nv">ndo_select_queue</span><span class="ss">)</span>
+                    <span class="nv">queue_index</span> <span class="o">=</span> <span class="nv">ops</span><span class="o">-&gt;</span><span class="nv">ndo_select_queue</span><span class="ss">(</span><span class="nv">dev</span>, <span class="nv">skb</span>, <span class="nv">accel_priv</span>,
+                                                        <span class="nv">__netdev_pick_tx</span><span class="ss">)</span><span class="c1">;</span>
+            <span class="k">else</span>
+                    <span class="nv">queue_index</span> <span class="o">=</span> <span class="nv">__netdev_pick_tx</span><span class="ss">(</span><span class="nv">dev</span>, <span class="nv">skb</span><span class="ss">)</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>/<em>...</em>/
+        }</p>
+<div class="highlight"><pre><span></span>    <span class="nv">skb_set_queue_mapping</span><span class="ss">(</span><span class="nv">skb</span>, <span class="nv">queue_index</span><span class="ss">)</span><span class="c1">;</span>
+    <span class="k">return</span> <span class="nv">netdev_get_tx_queue</span><span class="ss">(</span><span class="nv">dev</span>, <span class="nv">queue_index</span><span class="ss">)</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>```</p>
+</blockquote>
+<p>Quite a few steps:</p>
+<ul>
+<li>only act if real multiqueueing available</li>
+<li><strong>XPS</strong> won't pick a TX queue if the <strong>driver</strong> supports its <strong>own picking mechanism</strong> with <strong>ndo_select_queue</strong></li>
+<li>let <strong>__netdev_pick_tx</strong> do the grunt picking work - details in following<strong><br>
+</strong></li>
+<li><strong>skb_set_queue_mapping</strong> associates the choice with the current skb - quite astounding, I thought first, but via this channel, XPS communicates it's choice down to the driver, if it does not support <strong>ndo_select_queue</strong></li>
+<li>hand back to __<strong>dev_queue_xmit</strong> the chosen txq context</li>
+</ul>
+<p><strong>__netdev_pick_tx</strong> is too simplistic and mundane to show it, since it's name is quite descriptive enough:</p>
+<ul>
+<li>it determines current queue_index</li>
+<li>if the current index has not been set yet or the queue number changed or out of order packets are acceptable, then determine a new index with <strong>get_xps_queue</strong></li>
+<li>return the outcome</li>
+</ul>
+<p>Quite of intereset though, is <strong>get_xps_queue</strong>. Having a look at it answers the question if a CPU to TX queue mapping is necessarly confined to a 1:1 relationship - the rest shows up as expected: <a href="http://lxr.free-electrons.com/source/net/core/dev.c#L3208">/net/core/dev.c</a></p>
+<blockquote>
+<p>``` {style="color:#000000;background:#ffffff;"}
+        dev_maps = rcu_dereference(dev-&gt;xps_maps);
+        if (dev_maps) {
+                map = rcu_dereference(
+                    dev_maps-&gt;cpu_map[skb-&gt;sender_cpu - 1]);
+                if (map) {
+                        if (map-&gt;len == 1)
+                                queue_index = map-&gt;queues[0];
+                        else
+                                queue_index = map-&gt;queues[reciprocal_scale(skb_get_hash(skb),
+                                                                           map-&gt;len)];
+                        if (unlikely(queue_index &gt;= dev-&gt;real_num_tx_queues))
+                                queue_index = -1;
+                }
+        }
+        rcu_read_unlock();</p>
+<div class="highlight"><pre><span></span>    <span class="k">return</span> <span class="nv">queue_index</span><span class="c1">;</span>
+</pre></div>
+
+
+<p>```</p>
+</blockquote>
+<ul>
+<li>it determines the configures per CPU to TX queue map</li>
+<li>trivially fetch the mapping value if it's 1:1 association</li>
+<li>but if the queue is longer than a 1:1 relationship, <strong>reciprocal_scale(skb_get_hash(skb),</strong> <strong>map-&gt;len)</strong> distributes the packets based on their <strong>flow hash</strong> - so the packets are steered to TX queues based on which flow they belong to - astounding!</li>
+</ul>
+<h3>egress driver ring length</h3>
+<p>It might be better to rely on <a href="https://www.coverfire.com/articles/queueing-in-the-linux-network-stack/">BQL</a> ever since kernel 3.13 than adjust the driver queue length size manually to find a reasonable balance between  <a href="https://www.coverfire.com/articles/queueing-in-the-linux-network-stack/">latency an </a><a href="https://www.coverfire.com/articles/queueing-in-the-linux-network-stack/">throughput</a><a href="https://www.coverfire.com/articles/queueing-in-the-linux-network-stack/">(starvation)</a>.</p>
+<h4 id="Tuning">Tuning</h4>
+<h4 XPS id="apply">apply XPS</h4>
+<p>Prerequisites:</p>
+<ul>
+<li>kernel with <strong>CONFIG_XPS</strong> enabled</li>
+<li>multiple egress TX queues driver capability - XPS has no effect for a TX single queue</li>
+</ul>
+<p>Kernels with XPS configured offer a bitmap per TX queue via <strong>SysFs</strong>:</p>
+<blockquote>
+<div class="highlight"><pre><span></span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="k">class</span><span class="o">/</span><span class="n">net</span><span class="o">//</span><span class="n">queues</span><span class="o">/</span><span class="n">tx</span><span class="o">-/</span><span class="n">xps_cpus</span>
+</pre></div>
+
+
+</blockquote>
+<p>E.g. to allocate <strong>CPU1</strong> to <strong>tx_queue 2</strong> for driver behind <strong>iface enp2s0</strong>:</p>
+<blockquote>
+<p>echo <strong>1</strong> &gt; /sys/class/net/<strong>enp2s0</strong>/queues/<strong>tx-2</strong>/xps_cpus</p>
+</blockquote>
+<h3><strong>multi queuing</strong></h3>
+<p>The by the driver as a default offered TX queue number and outline are usually not the optimal one for your current workload and environment.</p>
+<p>Adjustments are being done symmetrically to the approach on <a href="https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/#adjusting-the-number-of-rx-queues">RX side</a>. Nevertheless, for completeness sake, I'll repeat the essentials.</p>
+<h4>adjust queue count</h4>
+<p>Check for the current and max queues number supported by the NIC driver first.</p>
+<blockquote>
+<p># ethtool -l <strong>ens3</strong></p>
+<p>Channel parameters for <strong>ens3</strong>:<br>
+Pre-set maximums:<br>
+RX:        0<br>
+<strong>TX:        0</strong><br>
+Other:        0<br>
+<strong>Combined:    8</strong><br>
+Current hardware settings:<br>
+RX:        0<br>
+<strong>TX:        0</strong><br>
+Other:        0<br>
+<strong>Combined:    1</strong></p>
+</blockquote>
+<p>Again, you can adjust the egress number in two equally effective ways. Remember that setting it in a combined manner, though, scales both - the RX and TX  queue number.</p>
+<blockquote>
+<p># ethtool -L combined 8</p>
+</blockquote>
+<p>Or to set egress only:</p>
+<blockquote>
+<p># ethtool -L  tx 8</p>
+</blockquote>
+<p>Now, you can recheck your settings with <strong>ethtool -l</strong> .</p>
+<h4 id="adjust" length queue>adjust queue length</h4>
+<p>If <a href="https://www.coverfire.com/articles/queueing-in-the-linux-network-stack/">BQL</a> is ready in your kernel,  adapting the the driver queues might become an unecessary or redundant step to take.</p>
+<p>First, you should check the maximal and currently applied length.</p>
+<blockquote>
+<div class="highlight"><pre><span></span># <span class="nv">ethtool</span> <span class="o">-</span><span class="nv">g</span> <span class="nv">ens3</span>
+<span class="nv">Ring</span> <span class="nv">parameters</span> <span class="k">for</span> <span class="nv">eth0</span>:
+<span class="nv">Pre</span><span class="o">-</span><span class="nv">set</span> <span class="nv">maximums</span>:
+<span class="nv">RX</span>:   <span class="mi">4096</span>
+<span class="nv">RX</span> <span class="nv">Mini</span>:  <span class="mi">0</span>
+<span class="nv">RX</span> <span class="nv">Jumbo</span>: <span class="mi">0</span>
+<span class="nv">TX</span>:   <span class="mi">4096</span>
+<span class="nv">Current</span> <span class="nv">hardware</span> <span class="nv">settings</span>:
+<span class="nv">RX</span>:   <span class="mi">512</span>
+<span class="nv">RX</span> <span class="nv">Mini</span>:  <span class="mi">0</span>
+<span class="nv">RX</span> <span class="nv">Jumbo</span>: <span class="mi">0</span>
+<span class="nv">TX</span>:   <span class="mi">512</span>
+</pre></div>
+
+
+</blockquote>
+<p>Then, you can increase it to the whatever length you see fit - here the maximum.</p>
+<blockquote>
+<p># ethtool -G <strong>ens3</strong> <strong><em>tx</em></strong> <strong>4096</strong></p>
+</blockquote>
+<h3 id="Hard-IRQs">Hard-IRQs</h3>
+<p>You might have noticed that for the egress paths, no Hard-IRQ handling for any interrupt technology are registered. It has been pointed out <a href="#__netif_schedule">further up</a>  that the egress stack code parts have a self triggering nature based on driver feedback of current transmission capabilities. The NIC is not interrupting the kernel as you've seen for the RX stack world, at least not to form feedback to it.</p>
+<p>Nevertheless, the driver has to do some internal housekeeping, which it's triggering with TX hard irqs. See as a reference <a href="https://blog.packagecloud.io/eng/2017/02/06/monitoring-tuning-linux-networking-stack-sending-data/#transmit-completions">transmit-completions section</a> of a similar article to that by now</p>
+<h3 id="election">CPU egress election</h3>
+<p>What is determing which CPU is used for the egress processing if not the IRQ as on RX side? In case you've read this article completely, you can tell by now, it's as simple as on which CPU the user land processing that is transmitting has been scheduled in.</p>
+<h1>Conclusion</h1>
+<p>Enjoy the first draft. I've still to refine some parts. Comments for improvement or wishes/suggestions for content extensions are quite welcome.</p>
+<h1 id="Appendix">Appendix</h1>
+<h3>Illustrations</h3>
+<h3 Based Queue Scaling id="Driver">Driver Queue Based Scaling</h3>
+<p>[caption id="attachment_2321" align="alignnone" width="11871"]<img alt="ns_tx_driv_qu_scale.svg" class="alignnone size-full wp-image-2321" height="7540" src="https://cherusk.github.io/2016/12/ns_tx_driv_qu_scale-svg.png" width="11871"> <a href="https://github.com/cherusk/kannjan/blob/master/ns_tx_driv_qu_scale.svg">To SVG</a>[/caption]</p>
+    </div><!-- /.entry-content -->
+    <footer class="post-meta">
+        <span class="meta-prep">Category:</span>
+        <abbr class="category">
+            <a href="https://cherusk.github.io/category/lnx-network-engineering-research.html">LNX Network Engineering Research</a>
+        </abbr>
+    </footer>
+    <section id="respond">
+        <div id="disqus_thread">
+        <script type="text/javascript">
+        var disqus_identifier = "monitoring-and-tuning-the-linux-networking-stack-egress-tx.html";
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        </div>
+
+    </section>
+</section>
+
+
+        </section><!-- #content -->
+        <section id="widgets" class="grid col-300 fit" >
+            <!--
+            <section id="widget-search" class="widget-wrapper widget_search">
+
+                <form id="searchform" action="http://www.google.com/search" method="get">
+                    <input id="q" class="field" type="text" placeholder="Search Blog" name="q" ></input>
+                    <input id="ie" name="ie" type="hidden" value="utf-8" ></input>
+                    <input id="oe" name="oe" type="hidden" value="utf-8" ></input>
+                    <input id="channel" name="channel" type="hidden" value="suggest" ></input>
+                    <input id="searchsubmit" class="submit" type="submit" value="">
+                </form>
+            </section>
+            -->
+            <section id="widget-category" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Category
+                </div>
+                <ul>
+                        <li><a href="https://cherusk.github.io/category/lnx-network-engineering-research.html" >LNX Network Engineering Research </a></li>
+                        <li><a href="https://cherusk.github.io/category/lnx-systems-engineering.html" >LNX Systems Engineering </a></li>
+                        <li><a href="https://cherusk.github.io/category/visions.html" >Visions </a></li>
+                </ul>
+            </section>
+
+            <section id="widget-tagcloud" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Tagcloud
+                </div>
+                <div>
+                </div>
+            </section>
+
+
+            <section id="widget-links" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Links
+                </div>
+                <ul>
+                        <li><a href="http://github.com/cherusk">github</a></li>
+                </ul>
+            </section>
+            
+        </section><!-- widgets -->
+    </section><!-- /#wrapper -->
+    <footer id="footer" class="clearfix"><section class="footer-wrapper">
+        <div class="grid col-940" >
+            <div class="grid col-540"></div>
+            <div class="grid col-380 fit" >
+                <ul class="social-icons">
+                    <!-- TO BE CONTINUED -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="grid col-300 copyright" >
+            <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" rel="license">
+                <img src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" style="border-width:0" alt="知识共享许可协议"></img>
+            </a>
+        </div>
+        <div class="grid col-300 ">
+
+        </div>
+        <div class="grid col-300 fit powered">
+            Powered by <a href="http://getpelican.com/">Pelican</a> <br />
+            which takes great advantage of <a href="http://python.org">Python</a>
+        </div>
+    </section></footer>
+</div>
+</body>
+</html>

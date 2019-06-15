@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <title>cherusk Tech Blog</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/style.css' type="text/css" media="all" />
+    <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/highlight.css' type="text/css" media="all" />
+    <link href="https://cherusk.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="cherusk Tech Blog Full Atom Feed" />
+    
+</head>
+
+<body id="index" class="blog">
+<div id="container" class="hfeed">
+    <header id="header" >
+        <div id="logo">
+            <h1><img src="https://cherusk.github.io//meta/cherusk.png" width="500" height="300" alt="小铱的故事" />
+                cherusk Tech Blog</h1>
+        </div> <!-- /#logo-->
+        <nav id="menu" class="main-nav"><ul class="menu">
+            <li  class="active"><a href="https://cherusk.github.io/pages/about.html">About</a></li>
+
+        </ul></nav><!-- /#menu -->
+    </header>
+    <section id="wrapper" class="clearfix">
+        <section id="content" class="grid col-620" >
+                <section class="breadcrumb-list">
+<a href="https://cherusk.github.io">Blog</a> ›<a href="category/lnx-network-engineering-research.html">LNX Network Engineering Research</a> ›Linux TCP - window scaling quantification | rmem,wmem
+                </section>
+
+
+<section id="post" class="post hentry">
+    <header>
+    <h2 class="post-title" >Linux TCP - window scaling quantification | rmem,wmem</h2>
+    
+    <div class="post-meta">
+        <span class="meta-prep">Post in</span>
+        <abbr class="date" title="2017-08-24T11:49:00+00:00"> 
+            <a href="https://cherusk.github.io/archive/2017/Aug/index.html">Thu 24 August 2017 </a>
+        </abbr>
+        <span class="meta-prep"> |Tags</span>
+                <a href="https://cherusk.github.io/tag/bottle-neck.html">bottle-neck</a>
+                <a href="https://cherusk.github.io/tag/congestion-control.html">congestion control</a>
+                <a href="https://cherusk.github.io/tag/core-emulator.html">core emulator</a>
+                <a href="https://cherusk.github.io/tag/data-series.html">data series</a>
+                <a href="https://cherusk.github.io/tag/explanation.html">explanation</a>
+                <a href="https://cherusk.github.io/tag/flent.html">flent</a>
+                <a href="https://cherusk.github.io/tag/hint.html">hint</a>
+                <a href="https://cherusk.github.io/tag/interpretation.html">interpretation</a>
+                <a href="https://cherusk.github.io/tag/linux.html">linux</a>
+                <a href="https://cherusk.github.io/tag/network-stack.html">network stack</a>
+                <a href="https://cherusk.github.io/tag/research.html">research</a>
+                <a href="https://cherusk.github.io/tag/scaling.html">scaling</a>
+                <a href="https://cherusk.github.io/tag/tcp.html">tcp</a>
+                <a href="https://cherusk.github.io/tag/tcp-flows.html">tcp flows</a>
+                <a href="https://cherusk.github.io/tag/tcp-rmem.html">tcp rmem</a>
+                <a href="https://cherusk.github.io/tag/tcp-wmem.html">tcp wmem</a>
+                <a href="https://cherusk.github.io/tag/testbed.html">testbed</a>
+                <a href="https://cherusk.github.io/tag/transeive-window-scaling.html">transeive window scaling</a>
+                <a href="https://cherusk.github.io/tag/tuning.html">Tuning</a>
+        <!-- TOBE COMMENTS -->
+    </div>
+    </header>
+    <div class="post-entry">
+        <h1>Drive behind introspection</h1>
+<p>First, a researcher's curiosity what is the actual plasticity of this setting and further the urge for complementing rather incomplete, technical statements made around this topic findable everywhere.</p>
+<h1>Testbed outline</h1>
+<p>All virtual, KVM or LXC based,  with a  most recent fedora26 (<strong>kernel 4.11</strong>) as VMs that are acting as the <strong>sender</strong> and <strong>sink</strong> for the runs. Apart from the window scaling, the network stack remained default configured as coming out of the box.</p>
+<p><strong>Sender</strong> and <strong>Sink</strong> were communicating via a <strong>CORE Emulator </strong>spanned L2 network, which seriously made handling the (<strong>non</strong>.)<strong>bottle-neck-link (1 Gbps, 2ms latency)</strong> setup a breeze for the run operator.</p>
+<p>Very basic, though, all what is needed to demonstrate the nominal aspect of the objectives. Certainly, exercising stronger infrastructure (e.g. plain HW) or further tunings (see refs.) will alleviate/taint the picture in specifc directions, though, the principle of the observations will stay the same - which is key.</p>
+<p>[caption id="attachment_2511" align="alignnone" width="882"]<img alt="Screenshot from 2017-08-23 18-12-35" class="alignnone size-full wp-image-2511" height="569" src="https://cherusk.github.io/2017/08/screenshot-from-2017-08-23-18-12-35.png" width="882"> Core EMULATOR based L2 test connection with artifcial <strong>bottle-neck-link</strong> in <strong>blue</strong>[/caption]</p>
+<h1>Run</h1>
+<h2>Settings space</h2>
+<blockquote>
+<p><strong>FED26 defaults</strong></p>
+<p>net.ipv4.tcp_rmem = 4096 87380 <strong>6291456</strong><br>
+net.ipv4.tcp_wmem = 4096 16384 <strong>4194304</strong></p>
+</blockquote>
+<p>The overall quantification measurements were done for window max sizes of (stepwidth of 20 % of predecessor in either direction from default)</p>
+<blockquote>
+<p>2516582 5033164 <strong>6291456 (default)</strong> 7549747 15099494 30198988 60397976</p>
+</blockquote>
+<p>and settings were always exercised in sync for <strong>tcp_rmem,tcp_wmem.</strong> That was done for convenience purposes for the operator mostly, technically, it makes sense to let <strong>wmem</strong> drag a little behind <strong>rmem.</strong> See reference for details upon the latter - while, studying closely the series graphs should also give the notion of the why.</p>
+<p>Moreover, the autoscaling effects of <strong>net.ipv4.tcp_mem</strong> were circumvented by setting those to the systems available max memory, in order to keep the sender sending merely based on what is advertised and not being clamped down by some kernel steered memory conservation approach on either side of the transmission.</p>
+<h2><strong>Instrumentarium</strong></h2>
+<p>All actual measurement taking was done in an automated fashion with the help of <a href="https://flent.org/">flent</a>, currently THE open network performance analysis suite for the TCP/IP stack.</p>
+<h2>Outcome</h2>
+<p>Further, the operator chose the number of <strong>injectors (TCP sender processes)</strong> as a further degree of freedom to influence the <strong>traffic load</strong> onto the <strong>bottle-neck-link</strong>.</p>
+<h2>Saturated Bottleneck</h2>
+<p><strong> Specifics: 1 Gbps, 2ms latency</strong></p>
+<h3>20 injectors</h3>
+<h3><img alt="batch-2017-11-05T125407-tcp_scal_eval_fl_20_totals" class="alignnone size-full wp-image-2732" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t125407-tcp_scal_eval_fl_20_totals.png" width="1929"><img alt="batch-2017-11-05T125407-tcp_scal_eval_fl_20_ping_cdf" class="alignnone size-full wp-image-2730" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t125407-tcp_scal_eval_fl_20_ping_cdf.png" width="1700"><img alt="batch-2017-11-05T125407-tcp_scal_eval_fl_20_box_totals" class="alignnone size-full wp-image-2729" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t125407-tcp_scal_eval_fl_20_box_totals.png" width="1850"><img alt="tcp_cwnd" class="alignnone wp-image-2733" height="949" src="https://cherusk.github.io/2017/08/tcp_cwnd1.png" width="704"></h3>
+<h3>4 injectors<img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_totals" class="alignnone size-full wp-image-2728" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_totals.png" width="1929"></h3>
+<p><img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_ping_cdf" class="alignnone wp-image-2726" height="266" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_ping_cdf.png" width="754"><img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_box_totals" class="alignnone size-full wp-image-2725" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_box_totals.png" width="1850"><img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_tcp_cwnd" class="alignnone size-full wp-image-2727" height="632" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_tcp_cwnd.png" width="2212"></p>
+<h3></h3>
+<h3>1 injector</h3>
+<p><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_totals" class="alignnone size-full wp-image-2724" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_totals.png" width="1929"><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_ping_cdf" class="alignnone size-full wp-image-2722" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_ping_cdf.png" width="1700"><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_box_totals" class="alignnone size-full wp-image-2721" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_box_totals.png" width="1850"><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_tcp_cwnd" class="alignnone size-full wp-image-2723" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_tcp_cwnd.png" width="1700"></p>
+<h2>Non-Saturated Bottleneck</h2>
+<p><strong>Specifics: infinite bandwitdh, 2ms latency<br>
+</strong></p>
+<h3>8 injectors<img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_totals" class="alignnone size-full wp-image-2738" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_totals.png" width="1929"></h3>
+<p><img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_ping_cdf" class="alignnone size-full wp-image-2736" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_ping_cdf.png" width="1700"><img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_box_totals" class="alignnone size-full wp-image-2735" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_box_totals.png" width="1850"><img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_tcp_cwnd" class="alignnone size-full wp-image-2737" height="1222" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_tcp_cwnd.png" width="2212"></p>
+<h3>2 injectors</h3>
+<p><img alt="batch-2017-11-05T150055-tcp_scal_eval_fl2_non_cong_totals" class="alignnone size-full wp-image-2742" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t150055-tcp_scal_eval_fl2_non_cong_totals.png" width="1929"><img alt="batch-2017-11-05T150055-tcp_scal_eval_fl2_non_cong_ping_cdf" class="alignnone size-full wp-image-2740" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t150055-tcp_scal_eval_fl2_non_cong_ping_cdf.png" width="1700"><img alt="batch-2017-11-05T150055-tcp_scal_eval_fl2_non_cong_box_totals" class="alignnone size-full wp-image-2739" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t150055-tcp_scal_eval_fl2_non_cong_box_totals.png" width="1850"></p>
+<p><img alt="tcp_cwnd" class="alignnone size-full wp-image-2747" height="800" src="https://cherusk.github.io/2017/08/tcp_cwnd2.png" width="1500"></p>
+<h3>1 injector</h3>
+<p><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_totals" class="alignnone size-full wp-image-2746" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_totals.png" width="1929"><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_ping_cdf" class="alignnone size-full wp-image-2744" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_ping_cdf.png" width="1700"><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_box_totals" class="alignnone size-full wp-image-2743" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_box_totals.png" width="1850"></p>
+<p><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_tcp_cwnd" class="alignnone size-full wp-image-2749" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_tcp_cwnd1.png" width="1700"></p>
+<h2>Interpretation</h2>
+<p>It mostly aligns with the expectations as of which I had:</p>
+<ul>
+<li>Is the <strong>bottle-neck</strong> <strong>NOT</strong> saturated then the latency determining factor is the traffic handling fortitude offered by the actual producer(<strong>sender</strong>)/consumer(<strong>receiver</strong>) on respective ends - boiling down to what 'hardware' is in use.</li>
+<li>Otherwise, in a <strong>link saturation situation</strong>, allowing the sender to progress sending by keeping the TCP sink advertising, can increase the perceived latency. Since then in addition to the  <strong>bottle-neck</strong> and therefore  what the <strong>TCP congestion control</strong> (<strong>cubic in this case</strong>) does and can deliver - as recognizable by the distinctive sawtooth pattern for the latency and TCP socket cwnd samples -, a potentially standing queue formed on either or sender and sink side on socket buffer layer in the stack does influence the overall performance.</li>
+</ul>
+<h1>References</h1>
+<h3>TCP specifics for novices</h3>
+<ul>
+<li>Fall KR, Stevens WR. TCP/IP Illustrated. Addison-Wesley Professional; 2011., 9780321336316</li>
+<li>Peter L Dordal. <a href="http://intronetworks.cs.luc.edu/current/html/"><em>Introduction to Computer Networks</em></a>. Department of Computer Science: Loyola University Chicago;</li>
+</ul>
+    </div><!-- /.entry-content -->
+    <footer class="post-meta">
+        <span class="meta-prep">Category:</span>
+        <abbr class="category">
+            <a href="https://cherusk.github.io/category/lnx-network-engineering-research.html">LNX Network Engineering Research</a>
+        </abbr>
+    </footer>
+    <section id="respond">
+        <div id="disqus_thread">
+        <script type="text/javascript">
+        var disqus_identifier = "linux-tcp-window-scaling-quantification-rmemwmem.html";
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        </div>
+
+    </section>
+</section>
+
+
+        </section><!-- #content -->
+        <section id="widgets" class="grid col-300 fit" >
+            <!--
+            <section id="widget-search" class="widget-wrapper widget_search">
+
+                <form id="searchform" action="http://www.google.com/search" method="get">
+                    <input id="q" class="field" type="text" placeholder="Search Blog" name="q" ></input>
+                    <input id="ie" name="ie" type="hidden" value="utf-8" ></input>
+                    <input id="oe" name="oe" type="hidden" value="utf-8" ></input>
+                    <input id="channel" name="channel" type="hidden" value="suggest" ></input>
+                    <input id="searchsubmit" class="submit" type="submit" value="">
+                </form>
+            </section>
+            -->
+            <section id="widget-category" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Category
+                </div>
+                <ul>
+                        <li><a href="https://cherusk.github.io/category/lnx-network-engineering-research.html" >LNX Network Engineering Research </a></li>
+                        <li><a href="https://cherusk.github.io/category/lnx-systems-engineering.html" >LNX Systems Engineering </a></li>
+                        <li><a href="https://cherusk.github.io/category/visions.html" >Visions </a></li>
+                </ul>
+            </section>
+
+            <section id="widget-tagcloud" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Tagcloud
+                </div>
+                <div>
+                </div>
+            </section>
+
+
+            <section id="widget-links" class="widget-wrapper widget_archive">
+                <div class="widget-title">
+                    Links
+                </div>
+                <ul>
+                        <li><a href="http://github.com/cherusk">github</a></li>
+                </ul>
+            </section>
+            
+        </section><!-- widgets -->
+    </section><!-- /#wrapper -->
+    <footer id="footer" class="clearfix"><section class="footer-wrapper">
+        <div class="grid col-940" >
+            <div class="grid col-540"></div>
+            <div class="grid col-380 fit" >
+                <ul class="social-icons">
+                    <!-- TO BE CONTINUED -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="grid col-300 copyright" >
+            <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" rel="license">
+                <img src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" style="border-width:0" alt="知识共享许可协议"></img>
+            </a>
+        </div>
+        <div class="grid col-300 ">
+
+        </div>
+        <div class="grid col-300 fit powered">
+            Powered by <a href="http://getpelican.com/">Pelican</a> <br />
+            which takes great advantage of <a href="http://python.org">Python</a>
+        </div>
+    </section></footer>
+</div>
+</body>
+</html>
