@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/style.css' type="text/css" media="all" />
     <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/highlight.css' type="text/css" media="all" />
-    <link href="https://cherusk.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="cherusk Tech Blog Full Atom Feed" />
     
 </head>
 
@@ -19,7 +18,7 @@
                 cherusk Tech Blog</h1>
         </div> <!-- /#logo-->
         <nav id="menu" class="main-nav"><ul class="menu">
-            <li  class="active"><a href="https://cherusk.github.io/pages/about.html">About</a></li>
+            <li  class="active"><a href="/pages/contact.html">Contact</a></li>
 
         </ul></nav><!-- /#menu -->
     </header>
@@ -27,7 +26,9 @@
         <section id="content" class="grid col-620" >
                 <section class="breadcrumb-list">
 <a href="https://cherusk.github.io">Blog</a> ›<a href="category/lnx-network-engineering-research.html">LNX Network Engineering Research</a> ›Linux TCP - window scaling quantification | rmem,wmem
+
                 </section>
+
 
 
 <section id="post" class="post hentry">
@@ -61,20 +62,30 @@
                 <a href="https://cherusk.github.io/tag/tuning.html">Tuning</a>
         <!-- TOBE COMMENTS -->
     </div>
+
+
+
     </header>
+
+    <!-- TOC -->
+    <div class="toc col-lg-3 hidden-xs hidden-sm">
+        <b>Table of Content</b>
+        <div id="toc"><ul><li><a class="toc-href" href="#drive behind introspection" title="Drive behind introspection">Drive behind introspection</a></li><li><a class="toc-href" href="#testbed outline" title="Testbed outline">Testbed outline</a></li><li><a class="toc-href" href="#run" title="Run">Run</a><ul><li><a class="toc-href" href="#settings space" title="Settings space">Settings space</a></li><li><a class="toc-href" href="#instrumentarium" title="Instrumentarium">Instrumentarium</a></li><li><a class="toc-href" href="#outcome" title="Outcome">Outcome</a></li><li><a class="toc-href" href="#saturated bottleneck" title="Saturated Bottleneck">Saturated Bottleneck</a><ul><li><a class="toc-href" href="#20 injectors" title="20 injectors">20 injectors</a></li><li><a class="toc-href" href="#_1" title=""></a></li><li><a class="toc-href" href="#4 injectors" title="4 injectors">4 injectors</a></li><li><a class="toc-href" href="#_2" title=""></a></li><li><a class="toc-href" href="#1 injector" title="1 injector">1 injector</a></li></ul></li><li><a class="toc-href" href="#non-saturated bottleneck_1" title="Non-Saturated Bottleneck">Non-Saturated Bottleneck</a><ul><li><a class="toc-href" href="#8 injectors" title="8 injectors">8 injectors</a></li><li><a class="toc-href" href="#2 injectors" title="2 injectors">2 injectors</a></li><li><a class="toc-href" href="#1 injector_1" title="1 injector">1 injector</a></li></ul></li><li><a class="toc-href" href="#interpretation_1" title="Interpretation">Interpretation</a></li></ul></li><li><a class="toc-href" href="#references_1" title="References">References</a><ul><li><a class="toc-href" href="#tcp specifics for novices" title="TCP specifics for novices">TCP specifics for novices</a></li></ul></li></ul></div>
+    </div>
+
     <div class="post-entry">
-        <h1>Drive behind introspection</h1>
+        <h1 id="drive behind introspection">Drive behind introspection</h1>
 <p>First, a researcher's curiosity what is the actual plasticity of this setting and further the urge for complementing rather incomplete, technical statements made around this topic findable everywhere.</p>
-<h1>Testbed outline</h1>
-<p>All virtual, KVM or LXC based,  with a  most recent fedora26 (<strong>kernel 4.11</strong>) as VMs that are acting as the <strong>sender</strong> and <strong>sink</strong> for the runs. Apart from the window scaling, the network stack remained default configured as coming out of the box.</p>
-<p><strong>Sender</strong> and <strong>Sink</strong> were communicating via a <strong>CORE Emulator </strong>spanned L2 network, which seriously made handling the (<strong>non</strong>.)<strong>bottle-neck-link (1 Gbps, 2ms latency)</strong> setup a breeze for the run operator.</p>
+<h1 id="testbed outline">Testbed outline</h1>
+<p>All virtual, KVM or LXC based,&nbsp; with a&nbsp; most recent fedora26 (<strong>kernel 4.11</strong>) as VMs that are acting as the <strong>sender</strong> and <strong>sink</strong> for the runs. Apart from the window scaling, the network stack remained default configured as coming out of the box.</p>
+<p><strong>Sender</strong> and <strong>Sink</strong> were communicating via a <strong>CORE Emulator&nbsp;</strong>spanned L2 network, which seriously made handling the (<strong>non</strong>.)<strong>bottle-neck-link (1 Gbps, 2ms latency)</strong> setup a breeze for the run operator.</p>
 <p>Very basic, though, all what is needed to demonstrate the nominal aspect of the objectives. Certainly, exercising stronger infrastructure (e.g. plain HW) or further tunings (see refs.) will alleviate/taint the picture in specifc directions, though, the principle of the observations will stay the same - which is key.</p>
-<p>[caption id="attachment_2511" align="alignnone" width="882"]<img alt="Screenshot from 2017-08-23 18-12-35" class="alignnone size-full wp-image-2511" height="569" src="https://cherusk.github.io/2017/08/screenshot-from-2017-08-23-18-12-35.png" width="882"> Core EMULATOR based L2 test connection with artifcial <strong>bottle-neck-link</strong> in <strong>blue</strong>[/caption]</p>
-<h1>Run</h1>
-<h2>Settings space</h2>
+<p>[caption id="attachment_2511" align="alignnone" width="882"]<img alt="Screenshot from 2017-08-23 18-12-35" class="alignnone size-full wp-image-2511" height="569" src="https://cherusk.github.io/2017/08/screenshot-from-2017-08-23-18-12-35.png" width="882"/> Core EMULATOR based L2 test connection with artifcial <strong>bottle-neck-link</strong> in <strong>blue</strong>[/caption]</p>
+<h1 id="run">Run</h1>
+<h2 id="settings space">Settings space</h2>
 <blockquote>
 <p><strong>FED26 defaults</strong></p>
-<p>net.ipv4.tcp_rmem = 4096 87380 <strong>6291456</strong><br>
+<p>net.ipv4.tcp_rmem = 4096 87380 <strong>6291456</strong><br/>
 net.ipv4.tcp_wmem = 4096 16384 <strong>4194304</strong></p>
 </blockquote>
 <p>The overall quantification measurements were done for window max sizes of (stepwidth of 20 % of predecessor in either direction from default)</p>
@@ -83,38 +94,38 @@ net.ipv4.tcp_wmem = 4096 16384 <strong>4194304</strong></p>
 </blockquote>
 <p>and settings were always exercised in sync for <strong>tcp_rmem,tcp_wmem.</strong> That was done for convenience purposes for the operator mostly, technically, it makes sense to let <strong>wmem</strong> drag a little behind <strong>rmem.</strong> See reference for details upon the latter - while, studying closely the series graphs should also give the notion of the why.</p>
 <p>Moreover, the autoscaling effects of <strong>net.ipv4.tcp_mem</strong> were circumvented by setting those to the systems available max memory, in order to keep the sender sending merely based on what is advertised and not being clamped down by some kernel steered memory conservation approach on either side of the transmission.</p>
-<h2><strong>Instrumentarium</strong></h2>
+<h2 id="instrumentarium"><strong>Instrumentarium</strong></h2>
 <p>All actual measurement taking was done in an automated fashion with the help of <a href="https://flent.org/">flent</a>, currently THE open network performance analysis suite for the TCP/IP stack.</p>
-<h2>Outcome</h2>
+<h2 id="outcome">Outcome</h2>
 <p>Further, the operator chose the number of <strong>injectors (TCP sender processes)</strong> as a further degree of freedom to influence the <strong>traffic load</strong> onto the <strong>bottle-neck-link</strong>.</p>
-<h2>Saturated Bottleneck</h2>
-<p><strong> Specifics: 1 Gbps, 2ms latency</strong></p>
-<h3>20 injectors</h3>
-<h3><img alt="batch-2017-11-05T125407-tcp_scal_eval_fl_20_totals" class="alignnone size-full wp-image-2732" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t125407-tcp_scal_eval_fl_20_totals.png" width="1929"><img alt="batch-2017-11-05T125407-tcp_scal_eval_fl_20_ping_cdf" class="alignnone size-full wp-image-2730" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t125407-tcp_scal_eval_fl_20_ping_cdf.png" width="1700"><img alt="batch-2017-11-05T125407-tcp_scal_eval_fl_20_box_totals" class="alignnone size-full wp-image-2729" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t125407-tcp_scal_eval_fl_20_box_totals.png" width="1850"><img alt="tcp_cwnd" class="alignnone wp-image-2733" height="949" src="https://cherusk.github.io/2017/08/tcp_cwnd1.png" width="704"></h3>
-<h3>4 injectors<img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_totals" class="alignnone size-full wp-image-2728" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_totals.png" width="1929"></h3>
-<p><img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_ping_cdf" class="alignnone wp-image-2726" height="266" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_ping_cdf.png" width="754"><img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_box_totals" class="alignnone size-full wp-image-2725" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_box_totals.png" width="1850"><img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_tcp_cwnd" class="alignnone size-full wp-image-2727" height="632" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_tcp_cwnd.png" width="2212"></p>
-<h3></h3>
-<h3>1 injector</h3>
-<p><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_totals" class="alignnone size-full wp-image-2724" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_totals.png" width="1929"><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_ping_cdf" class="alignnone size-full wp-image-2722" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_ping_cdf.png" width="1700"><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_box_totals" class="alignnone size-full wp-image-2721" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_box_totals.png" width="1850"><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_tcp_cwnd" class="alignnone size-full wp-image-2723" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_tcp_cwnd.png" width="1700"></p>
-<h2>Non-Saturated Bottleneck</h2>
-<p><strong>Specifics: infinite bandwitdh, 2ms latency<br>
+<h2 id="saturated bottleneck">Saturated Bottleneck</h2>
+<p><strong>&nbsp;Specifics: 1 Gbps, 2ms latency</strong></p>
+<h3 id="20 injectors">20 injectors</h3>
+<h3 id="_1"><img alt="batch-2017-11-05T125407-tcp_scal_eval_fl_20_totals" class="alignnone size-full wp-image-2732" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t125407-tcp_scal_eval_fl_20_totals.png" width="1929"/><img alt="batch-2017-11-05T125407-tcp_scal_eval_fl_20_ping_cdf" class="alignnone size-full wp-image-2730" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t125407-tcp_scal_eval_fl_20_ping_cdf.png" width="1700"/><img alt="batch-2017-11-05T125407-tcp_scal_eval_fl_20_box_totals" class="alignnone size-full wp-image-2729" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t125407-tcp_scal_eval_fl_20_box_totals.png" width="1850"/><img alt="tcp_cwnd" class="alignnone wp-image-2733" height="949" src="https://cherusk.github.io/2017/08/tcp_cwnd1.png" width="704"/></h3>
+<h3 id="4 injectors">4 injectors<img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_totals" class="alignnone size-full wp-image-2728" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_totals.png" width="1929"/></h3>
+<p><img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_ping_cdf" class="alignnone wp-image-2726" height="266" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_ping_cdf.png" width="754"/><img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_box_totals" class="alignnone size-full wp-image-2725" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_box_totals.png" width="1850"/><img alt="batch-2017-11-05T124309-tcp_scal_eval_fl_4_tcp_cwnd" class="alignnone size-full wp-image-2727" height="632" src="https://cherusk.github.io/2017/08/batch-2017-11-05t124309-tcp_scal_eval_fl_4_tcp_cwnd.png" width="2212"/></p>
+<h3 id="_2"></h3>
+<h3 id="1 injector">1 injector</h3>
+<p><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_totals" class="alignnone size-full wp-image-2724" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_totals.png" width="1929"/><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_ping_cdf" class="alignnone size-full wp-image-2722" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_ping_cdf.png" width="1700"/><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_box_totals" class="alignnone size-full wp-image-2721" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_box_totals.png" width="1850"/><img alt="batch-2017-11-05T121002-tcp_scal_eval_fl_1_tcp_cwnd" class="alignnone size-full wp-image-2723" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t121002-tcp_scal_eval_fl_1_tcp_cwnd.png" width="1700"/></p>
+<h2 id="non-saturated bottleneck_1">Non-Saturated Bottleneck</h2>
+<p><strong>Specifics: infinite bandwitdh, 2ms latency<br/>
 </strong></p>
-<h3>8 injectors<img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_totals" class="alignnone size-full wp-image-2738" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_totals.png" width="1929"></h3>
-<p><img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_ping_cdf" class="alignnone size-full wp-image-2736" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_ping_cdf.png" width="1700"><img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_box_totals" class="alignnone size-full wp-image-2735" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_box_totals.png" width="1850"><img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_tcp_cwnd" class="alignnone size-full wp-image-2737" height="1222" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_tcp_cwnd.png" width="2212"></p>
-<h3>2 injectors</h3>
-<p><img alt="batch-2017-11-05T150055-tcp_scal_eval_fl2_non_cong_totals" class="alignnone size-full wp-image-2742" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t150055-tcp_scal_eval_fl2_non_cong_totals.png" width="1929"><img alt="batch-2017-11-05T150055-tcp_scal_eval_fl2_non_cong_ping_cdf" class="alignnone size-full wp-image-2740" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t150055-tcp_scal_eval_fl2_non_cong_ping_cdf.png" width="1700"><img alt="batch-2017-11-05T150055-tcp_scal_eval_fl2_non_cong_box_totals" class="alignnone size-full wp-image-2739" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t150055-tcp_scal_eval_fl2_non_cong_box_totals.png" width="1850"></p>
-<p><img alt="tcp_cwnd" class="alignnone size-full wp-image-2747" height="800" src="https://cherusk.github.io/2017/08/tcp_cwnd2.png" width="1500"></p>
-<h3>1 injector</h3>
-<p><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_totals" class="alignnone size-full wp-image-2746" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_totals.png" width="1929"><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_ping_cdf" class="alignnone size-full wp-image-2744" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_ping_cdf.png" width="1700"><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_box_totals" class="alignnone size-full wp-image-2743" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_box_totals.png" width="1850"></p>
-<p><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_tcp_cwnd" class="alignnone size-full wp-image-2749" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_tcp_cwnd1.png" width="1700"></p>
-<h2>Interpretation</h2>
+<h3 id="8 injectors">8 injectors<img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_totals" class="alignnone size-full wp-image-2738" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_totals.png" width="1929"/></h3>
+<p><img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_ping_cdf" class="alignnone size-full wp-image-2736" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_ping_cdf.png" width="1700"/><img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_box_totals" class="alignnone size-full wp-image-2735" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_box_totals.png" width="1850"/><img alt="batch-2017-11-05T143144-tcp_scal_eval_fl_8_non_cong_tcp_cwnd" class="alignnone size-full wp-image-2737" height="1222" src="https://cherusk.github.io/2017/08/batch-2017-11-05t143144-tcp_scal_eval_fl_8_non_cong_tcp_cwnd.png" width="2212"/></p>
+<h3 id="2 injectors">2 injectors</h3>
+<p><img alt="batch-2017-11-05T150055-tcp_scal_eval_fl2_non_cong_totals" class="alignnone size-full wp-image-2742" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t150055-tcp_scal_eval_fl2_non_cong_totals.png" width="1929"/><img alt="batch-2017-11-05T150055-tcp_scal_eval_fl2_non_cong_ping_cdf" class="alignnone size-full wp-image-2740" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t150055-tcp_scal_eval_fl2_non_cong_ping_cdf.png" width="1700"/><img alt="batch-2017-11-05T150055-tcp_scal_eval_fl2_non_cong_box_totals" class="alignnone size-full wp-image-2739" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t150055-tcp_scal_eval_fl2_non_cong_box_totals.png" width="1850"/></p>
+<p><img alt="tcp_cwnd" class="alignnone size-full wp-image-2747" height="800" src="https://cherusk.github.io/2017/08/tcp_cwnd2.png" width="1500"/></p>
+<h3 id="1 injector_1">1 injector</h3>
+<p><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_totals" class="alignnone size-full wp-image-2746" height="619" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_totals.png" width="1929"/><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_ping_cdf" class="alignnone size-full wp-image-2744" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_ping_cdf.png" width="1700"/><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_box_totals" class="alignnone size-full wp-image-2743" height="845" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_box_totals.png" width="1850"/></p>
+<p><img alt="batch-2017-11-05T134127-tcp_scal_eval_fl_1_non_cong_tcp_cwnd" class="alignnone size-full wp-image-2749" height="600" src="https://cherusk.github.io/2017/08/batch-2017-11-05t134127-tcp_scal_eval_fl_1_non_cong_tcp_cwnd1.png" width="1700"/></p>
+<h2 id="interpretation_1">Interpretation</h2>
 <p>It mostly aligns with the expectations as of which I had:</p>
 <ul>
 <li>Is the <strong>bottle-neck</strong> <strong>NOT</strong> saturated then the latency determining factor is the traffic handling fortitude offered by the actual producer(<strong>sender</strong>)/consumer(<strong>receiver</strong>) on respective ends - boiling down to what 'hardware' is in use.</li>
-<li>Otherwise, in a <strong>link saturation situation</strong>, allowing the sender to progress sending by keeping the TCP sink advertising, can increase the perceived latency. Since then in addition to the  <strong>bottle-neck</strong> and therefore  what the <strong>TCP congestion control</strong> (<strong>cubic in this case</strong>) does and can deliver - as recognizable by the distinctive sawtooth pattern for the latency and TCP socket cwnd samples -, a potentially standing queue formed on either or sender and sink side on socket buffer layer in the stack does influence the overall performance.</li>
+<li>Otherwise, in a <strong>link saturation situation</strong>, allowing the sender to progress sending by keeping the TCP sink advertising, can increase the perceived latency. Since then in addition to the&nbsp; <strong>bottle-neck</strong> and therefore&nbsp; what the <strong>TCP congestion control</strong> (<strong>cubic in this case</strong>) does and can deliver - as recognizable by the distinctive sawtooth pattern for the latency and TCP socket cwnd samples -, a potentially standing queue formed on either or sender and sink side on socket buffer layer in the stack does influence the overall performance.</li>
 </ul>
-<h1>References</h1>
-<h3>TCP specifics for novices</h3>
+<h1 id="references_1">References</h1>
+<h3 id="tcp specifics for novices">TCP specifics for novices</h3>
 <ul>
 <li>Fall KR, Stevens WR. TCP/IP Illustrated. Addison-Wesley Professional; 2011., 9780321336316</li>
 <li>Peter L Dordal. <a href="http://intronetworks.cs.luc.edu/current/html/"><em>Introduction to Computer Networks</em></a>. Department of Computer Science: Loyola University Chicago;</li>
@@ -172,6 +183,122 @@ net.ipv4.tcp_wmem = 4096 16384 <strong>4194304</strong></p>
                     Tagcloud
                 </div>
                 <div>
+                        <span><a href="https://cherusk.github.io/tag/operations.html">operations</a></span>
+                        <span><a href="https://cherusk.github.io/tag/interpretation.html">interpretation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmitting.html">transmitting</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp.html">tcp</a></span>
+                        <span><a href="https://cherusk.github.io/tag/wan-networks.html">wan networks</a></span>
+                        <span><a href="https://cherusk.github.io/tag/testbed.html">testbed</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cable-to-sky.html">cable to sky</a></span>
+                        <span><a href="https://cherusk.github.io/tag/network-stack.html">network stack</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tx.html">TX</a></span>
+                        <span><a href="https://cherusk.github.io/tag/hint.html">hint</a></span>
+                        <span><a href="https://cherusk.github.io/tag/skb.html">skb</a></span>
+                        <span><a href="https://cherusk.github.io/tag/hap.html">HAP</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flowing-engineering.html">flowing engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tc.html">tc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-rmem.html">tcp rmem</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ethtool.html">ethtool</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bandwith-product.html">bandwith product</a></span>
+                        <span><a href="https://cherusk.github.io/tag/python.html">python</a></span>
+                        <span><a href="https://cherusk.github.io/tag/driver-queues.html">driver queues</a></span>
+                        <span><a href="https://cherusk.github.io/tag/scaling.html">scaling</a></span>
+                        <span><a href="https://cherusk.github.io/tag/kvmqemu.html">KVM/Qemu</a></span>
+                        <span><a href="https://cherusk.github.io/tag/satellites.html">satellites</a></span>
+                        <span><a href="https://cherusk.github.io/tag/updown-link.html">up/down link</a></span>
+                        <span><a href="https://cherusk.github.io/tag/backbone-internet.html">backbone internet</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmission.html">transmission</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queues.html">queues</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airborne-networking.html">airborne networking</a></span>
+                        <span><a href="https://cherusk.github.io/tag/stack-config.html">stack config</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airborne-internet-backbone.html">airborne internet backbone</a></span>
+                        <span><a href="https://cherusk.github.io/tag/optics.html">optics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/kernel.html">kernel</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-wmem.html">tcp wmem</a></span>
+                        <span><a href="https://cherusk.github.io/tag/genbackupdata.html">genbackupdata</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queuing-discipline.html">queuing discipline</a></span>
+                        <span><a href="https://cherusk.github.io/tag/system-operations.html">system operations</a></span>
+                        <span><a href="https://cherusk.github.io/tag/rsync.html">rsync</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cp.html">cp</a></span>
+                        <span><a href="https://cherusk.github.io/tag/research.html">research</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flowing.html">flowing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-control.html">Traffic Control</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-flows.html">traffic flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transeive-window-scaling.html">transeive window scaling</a></span>
+                        <span><a href="https://cherusk.github.io/tag/congestion-control.html">congestion control</a></span>
+                        <span><a href="https://cherusk.github.io/tag/theory.html">theory</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queueing.html">queueing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcpip.html">tcp/ip</a></span>
+                        <span><a href="https://cherusk.github.io/tag/resource-usage.html">resource usage</a></span>
+                        <span><a href="https://cherusk.github.io/tag/sending.html">sending</a></span>
+                        <span><a href="https://cherusk.github.io/tag/socket.html">socket</a></span>
+                        <span><a href="https://cherusk.github.io/tag/radio-links.html">radio links</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmit-packet-steering.html">transmit packet steering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ibvirt.html">ibvirt</a></span>
+                        <span><a href="https://cherusk.github.io/tag/fso-links.html">FSO links</a></span>
+                        <span><a href="https://cherusk.github.io/tag/egress.html">egress</a></span>
+                        <span><a href="https://cherusk.github.io/tag/data-migration.html">data migration</a></span>
+                        <span><a href="https://cherusk.github.io/tag/linux.html">linux</a></span>
+                        <span><a href="https://cherusk.github.io/tag/user-land.html">user land</a></span>
+                        <span><a href="https://cherusk.github.io/tag/core-emulator.html">core emulator</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bottle-neck.html">bottle-neck</a></span>
+                        <span><a href="https://cherusk.github.io/tag/utility.html">utility</a></span>
+                        <span><a href="https://cherusk.github.io/tag/statistics.html">statistics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/networking.html">networking</a></span>
+                        <span><a href="https://cherusk.github.io/tag/perf.html">perf</a></span>
+                        <span><a href="https://cherusk.github.io/tag/json.html">json</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flow-grouping.html">flow grouping</a></span>
+                        <span><a href="https://cherusk.github.io/tag/msi.html">msi</a></span>
+                        <span><a href="https://cherusk.github.io/tag/xps.html">XPS</a></span>
+                        <span><a href="https://cherusk.github.io/tag/net-traversal.html">net traversal</a></span>
+                        <span><a href="https://cherusk.github.io/tag/napi.html">NAPI</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-flows.html">tcp flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/comparison.html">comparison</a></span>
+                        <span><a href="https://cherusk.github.io/tag/data-series.html">data series</a></span>
+                        <span><a href="https://cherusk.github.io/tag/explanation.html">explanation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/machine-readable.html">machine readable</a></span>
+                        <span><a href="https://cherusk.github.io/tag/linux-engineering.html">linux engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/wireless.html">wireless</a></span>
+                        <span><a href="https://cherusk.github.io/tag/suite.html">suite</a></span>
+                        <span><a href="https://cherusk.github.io/tag/c-isp.html">c-ISP</a></span>
+                        <span><a href="https://cherusk.github.io/tag/future-backbones.html">future backbones</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tuning.html">Tuning</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ss.html">ss</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cwnd.html">cwnd</a></span>
+                        <span><a href="https://cherusk.github.io/tag/speed-of-light.html">speed of light</a></span>
+                        <span><a href="https://cherusk.github.io/tag/stack-traversal.html">stack traversal</a></span>
+                        <span><a href="https://cherusk.github.io/tag/global-backbone-network.html">global backbone network</a></span>
+                        <span><a href="https://cherusk.github.io/tag/high-altitude-platform.html">high altitude platform</a></span>
+                        <span><a href="https://cherusk.github.io/tag/vs.html">vs</a></span>
+                        <span><a href="https://cherusk.github.io/tag/monitoring.html">Monitoring</a></span>
+                        <span><a href="https://cherusk.github.io/tag/laser-communication.html">laser communication</a></span>
+                        <span><a href="https://cherusk.github.io/tag/mechanism.html">mechanism</a></span>
+                        <span><a href="https://cherusk.github.io/tag/introspection.html">introspection</a></span>
+                        <span><a href="https://cherusk.github.io/tag/network-paths.html">network paths</a></span>
+                        <span><a href="https://cherusk.github.io/tag/performance.html">performance</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tool.html">tool</a></span>
+                        <span><a href="https://cherusk.github.io/tag/nfs.html">nfs</a></span>
+                        <span><a href="https://cherusk.github.io/tag/space-to-earth-link.html">space-to-earth-link</a></span>
+                        <span><a href="https://cherusk.github.io/tag/trouble-shooting.html">trouble shooting</a></span>
+                        <span><a href="https://cherusk.github.io/tag/virt-builder.html">virt-builder</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flent.html">flent</a></span>
+                        <span><a href="https://cherusk.github.io/tag/nic.html">nic</a></span>
+                        <span><a href="https://cherusk.github.io/tag/driver.html">driver</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flows.html">flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/automation.html">automation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/metrics.html">metrics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airship.html">airship</a></span>
+                        <span><a href="https://cherusk.github.io/tag/softirq.html">softirq</a></span>
+                        <span><a href="https://cherusk.github.io/tag/qdisc.html">qdisc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ebpf.html">ebpf</a></span>
+                        <span><a href="https://cherusk.github.io/tag/fibre-backbone.html">fibre backbone</a></span>
+                        <span><a href="https://cherusk.github.io/tag/analysis.html">analysis</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bcc.html">bcc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-volume.html">traffic volume</a></span>
+                        <span><a href="https://cherusk.github.io/tag/multi-queueing.html">multi queueing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/correlation.html">correlation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/internet-engineering.html">internet engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/atmospheric-mitigation-techniques.html">atmospheric mitigation techniques</a></span>
                 </div>
             </section>
 

@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/style.css' type="text/css" media="all" />
     <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/highlight.css' type="text/css" media="all" />
-    <link href="https://cherusk.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="cherusk Tech Blog Full Atom Feed" />
     
 </head>
 
@@ -19,7 +18,7 @@
                 cherusk Tech Blog</h1>
         </div> <!-- /#logo-->
         <nav id="menu" class="main-nav"><ul class="menu">
-            <li  class="active"><a href="https://cherusk.github.io/pages/about.html">About</a></li>
+            <li  class="active"><a href="/pages/contact.html">Contact</a></li>
 
         </ul></nav><!-- /#menu -->
     </header>
@@ -27,7 +26,9 @@
         <section id="content" class="grid col-620" >
                 <section class="breadcrumb-list">
 <a href="https://cherusk.github.io">Blog</a> ›<a href="category/lnx-systems-engineering.html">LNX Systems Engineering</a> ›rsync or cp over net based file systems
+
                 </section>
+
 
 
 <section id="post" class="post hentry">
@@ -55,17 +56,27 @@
                 <a href="https://cherusk.github.io/tag/vs.html">vs</a>
         <!-- TOBE COMMENTS -->
     </div>
+
+
+
     </header>
+
+    <!-- TOC -->
+    <div class="toc col-lg-3 hidden-xs hidden-sm">
+        <b>Table of Content</b>
+        <div id="toc"><ul><li><a class="toc-href" href="#question" title="Question">Question</a></li><li><a class="toc-href" href="#setup" title="Setup">Setup</a></li><li><a class="toc-href" href="#approach" title="Approach">Approach</a></li><li><a class="toc-href" href="#outcome" title="Outcome">Outcome</a></li><li><a class="toc-href" href="#conclusion" title="Conclusion">Conclusion</a></li></ul></div>
+    </div>
+
     <div class="post-entry">
-        <h1>Question</h1>
-<p>Skimming the net with all thinkable efforts I could find some passionately led discussions and interesting articles about cp and rsync performance comparisons. Foremost <a href="https://lwn.net/Articles/400489/">LWN-CP-RSYNC</a> raised my attention for it promising in a technically perfect manner a more than doubling of throughput when opting for coreutils' cp in default local data migration setups instead for rsync.  For me being a Data Centre engineer,  I was wondering if cp would still outperform rsync when data is to be beamed over non-local, net based file systems. Although being vividly discussed, I could not find any recent and reliabe data to that topic online. I expected the for the local migration measured  findings to hold for net based file systems because of the minimalistic data pushing facilities of cp and the a little more complex architecture and algorithms of rsync. I did not consider cat or cpio here since both seem to show the more or less same performance level as cp.</p>
-<h1>Setup</h1>
-<p>I chose a minimal but still lifelike enough setup to compare the two tools. All components were based on <a href="http://www.linux-kvm.org/page/Main_Page">KVM/Qemu</a>  were controlled and run with <a href="http://wiki.libvirt.org/page/Main_Page">libvirt</a> mechanism, especially virsh. I won't go into detail about that is done as the respective docs are more exhaustive on that as I could. What I want to point out here is <a href="http://libguestfs.org/virt-builder.1.html">virt-builder</a> of the libguestfs package which made creating the VMs quite comfortable and quick.</p>
-<p><img alt="setup" class="alignnone size-full wp-image-69" height="883" src="https://cherusk.github.io/2016/08/setup.png" width="2132"></p>
+        <h1 id="question">Question</h1>
+<p>Skimming the net with all thinkable efforts I could find some passionately led discussions and interesting articles about cp and rsync performance comparisons. Foremost <a href="https://lwn.net/Articles/400489/">LWN-CP-RSYNC</a> raised my attention for it promising in a technically perfect manner a more than doubling of throughput when opting for coreutils' cp in default local data migration setups instead for rsync.&nbsp; For me being a Data Centre engineer,&nbsp; I was wondering if cp would still outperform rsync when&nbsp;data is to be beamed over non-local, net based file systems. Although being vividly discussed, I could not find any recent and reliabe data to that topic online. I expected the for the local migration measured&nbsp; findings to hold for net based file systems because of the minimalistic data pushing facilities of cp and the a little more complex architecture and algorithms of rsync. I did not consider cat or cpio here since both seem to show the more or less same performance level as cp.</p>
+<h1 id="setup">Setup</h1>
+<p>I chose a minimal but still lifelike enough setup to compare the two tools. All components were based on <a href="http://www.linux-kvm.org/page/Main_Page">KVM/Qemu</a>&nbsp; were controlled and run with <a href="http://wiki.libvirt.org/page/Main_Page">libvirt</a> mechanism, especially virsh. I won't go into detail about that is done as the respective docs are more exhaustive on that as I could. What I want to point out here is <a href="http://libguestfs.org/virt-builder.1.html">virt-builder</a> of the libguestfs package which made creating the VMs quite comfortable and quick.</p>
+<p><img alt="setup" class="alignnone size-full wp-image-69" height="883" src="https://cherusk.github.io/2016/08/setup.png" width="2132"/></p>
 <p>Mainly, I opted for NFS as a network based FS as it is open and quickly and with ease to configure. Moreover, it's still quite widespread in data centres as well.</p>
 <p>Basically, the two opensuse 42.1 based VMs were the NFS serving machines. The fedora24 Server Version VM had the NFS client data pushing role. Fedora ran on kernel 4.5.7-300.fc24.x86_64, the suse ones on 4.1.12-1-default. All machines had 2024 MB phys. RAM and 1 phys. Processor.</p>
 <p>The virsh brought up and not manually tweakd virtual net I tested with:</p>
-<hr>
+<hr/>
 <p><strong>[root@suse42_n1 \~]# iperf3 -s</strong></p>
 <p><strong>[root@fedora24 \~]# iperf3 -c suse42_n1</strong></p>
 <p><strong>[...]</strong></p>
@@ -73,23 +84,23 @@
 <p><strong>[ ID] Interval Transfer Bandwidth Retr</strong></p>
 <p><strong>[ 4] 0.00-10.00 sec 2.78 GBytes 2.39 Gbits/sec 15859 sender</strong></p>
 <p><strong>[ 4] 0.00-10.00 sec 2.78 GBytes 2.39 Gbits/sec receiver</strong></p>
-<hr>
+<hr/>
 <p>So not the fastest connection one seen in data centres but representative enough for the comparison.</p>
 <p>The data source and sinks were <strong>5GB</strong> large Virtio-Disks with BTRFS on them. Going for BTRFS was quite arbitrary since the local backend FS was not of to much of avail for the comparison.</p>
 <p>The mounts:</p>
-<hr>
-<p><strong>[root@fedora24 \~]# nfsstat -m</strong><br>
-<strong>/source from suse42_n1:/source</strong><br>
+<hr/>
+<p><strong>[root@fedora24 \~]# nfsstat -m</strong><br/>
+<strong>/source from suse42_n1:/source</strong><br/>
 <strong>Flags: rw,relatime,vers=4.2,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,port=0,</strong></p>
 <p><strong>timeo=600,retrans=2,sec=sys,clientaddr=192.168.122.89,local_lock=none,addr=192.168.122.158</strong></p>
-<p><strong>/sink from suse42_n2:/sink</strong><br>
+<p><strong>/sink from suse42_n2:/sink</strong><br/>
 <strong>Flags: rw,relatime,vers=4.2,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,port=0,</strong></p>
 <p><strong>timeo=600,retrans=2,sec=sysclientaddr,=192.168.122.89,local_lock=none,addr=192.168.122.52</strong></p>
-<hr>
-<h1>Approach</h1>
-<p>All the action was on the fedora24 node for it being the data pushing entity. I decided to have several runs with different data constellations in /source. <a href="http://linux.die.net/man/1/genbackupdata">genbackupdata</a> was my tool of choice for data generation although not fully working. It promises files with distributed shape, but it can produce files only uniformly. Its <strong>--delete</strong>, <strong>--rename</strong>, or <strong>--modify</strong> flags were somehow not implemented. Still, a good choice to create random data.</p>
+<hr/>
+<h1 id="approach">Approach</h1>
+<p>All the action was on the fedora24 node for it being the data pushing entity. I decided to have several runs with different data constellations in /source. <a href="http://linux.die.net/man/1/genbackupdata">genbackupdata</a> was my tool of choice for data generation although not fully working. It promises files with distributed shape, but it can produce files only uniformly. Its&nbsp;<strong>--delete</strong>, <strong>--rename</strong>, or <strong>--modify</strong> flags were somehow not implemented. Still, a good choice to create random data.</p>
 <p>I went for 6 runs and generated for each.</p>
-<hr>
+<hr/>
 <p><strong>genbackupdata --create=SIZE [--chunk-size=C_SIZE] [--file-size=F_SIZE] --depth=3 /source/</strong></p>
 <table class="tg">
 <tbody>
@@ -205,31 +216,30 @@ Gen. Files
 </tr>
 </tbody>
 </table>
-
 <p>For instance for <strong>genbackupdata --create=100M</strong> we get:</p>
-<p><strong>matthias@suse42_n1:\~&gt; du -h /source/</strong><br>
-<strong>2,1M    /source/0/0/0/0/0</strong><br>
-<strong>2,0M    /source/0/0/0/0/1</strong><br>
-<strong>2,1M    /source/0/0/0/0/6</strong><br>
-<strong>2,1M    /source/0/0/0/0/2</strong><br>
-<strong>[...]</strong><br>
-<strong>17M    /source/0/0/0</strong><br>
-<strong>17M    /source/0/0</strong><br>
-<strong>17M    /source/0</strong><br>
-<strong>100M    /source/</strong></p>
-<hr>
+<p><strong>matthias@suse42_n1:\~&gt; du -h /source/</strong><br/>
+<strong>2,1M&nbsp;&nbsp; &nbsp;/source/0/0/0/0/0</strong><br/>
+<strong>2,0M&nbsp;&nbsp; &nbsp;/source/0/0/0/0/1</strong><br/>
+<strong>2,1M&nbsp;&nbsp; &nbsp;/source/0/0/0/0/6</strong><br/>
+<strong>2,1M&nbsp;&nbsp; &nbsp;/source/0/0/0/0/2</strong><br/>
+<strong>[...]</strong><br/>
+<strong>17M&nbsp;&nbsp; &nbsp;/source/0/0/0</strong><br/>
+<strong>17M&nbsp;&nbsp; &nbsp;/source/0/0</strong><br/>
+<strong>17M&nbsp;&nbsp; &nbsp;/source/0</strong><br/>
+<strong>100M&nbsp;&nbsp; &nbsp;/source/</strong></p>
+<hr/>
 <p>Before every run I diligently cleaned up all the caches:</p>
-<hr>
-<p><strong>echo 1 &gt; /proc/sys/vm/drop_caches</strong><br>
-<strong>echo 2 &gt; /proc/sys/vm/drop_caches</strong><br>
-<strong>echo 3 &gt; /proc/sys/vm/drop_caches</strong><br>
-<strong>swapoff -a</strong><br>
+<hr/>
+<p><strong>echo 1 &gt; /proc/sys/vm/drop_caches</strong><br/>
+<strong>echo 2 &gt; /proc/sys/vm/drop_caches</strong><br/>
+<strong>echo 3 &gt; /proc/sys/vm/drop_caches</strong><br/>
+<strong>swapoff -a</strong><br/>
 <strong>sync</strong></p>
-<hr>
+<hr/>
 <p>I tracked every run:</p>
-<hr>
+<hr/>
 <p><strong>time -a -o measurem -f "real %e user %U sys %S avg-io-pg-fault %F fs-in %I fs-out %O avg-mem %K max-resident %M avg-res %t cpu %P% "</strong></p>
-<hr>
+<hr/>
 <p>The CMD itself and intermediate steps abstractly:</p>
 <ol>
 <li>run copy</li>
@@ -237,8 +247,8 @@ Gen. Files
 <li>run sync</li>
 <li>cleanup /sink</li>
 </ol>
-<p>and  in practice then:</p>
-<hr>
+<p>and&nbsp; in practice then:</p>
+<hr/>
 <ul>
 <li>RSYNC:<ol>
 <li><strong>rsync -aHv --no-whole-file --progress /source/ /sink</strong></li>
@@ -255,8 +265,8 @@ Gen. Files
 </ol>
 </li>
 </ul>
-<hr>
-<h1>Outcome</h1>
+<hr/>
+<h1 id="outcome">Outcome</h1>
 <p>The table does not show CPU usage, since that was for all runs <strong>&lt;5%</strong> for cp and <strong>near 20 %</strong> for rsync. Therefore, the net was mainly the bottleneck, as expected.</p>
 <table class="tg">
 <tbody>
@@ -704,8 +714,7 @@ CP
 </tr>
 </tbody>
 </table>
-
-<hr>
+<hr/>
 <p><strong>[root@fedora24 \~]# nfsiostat</strong></p>
 <p><strong>suse42_n2:/sink mounted on /sink:</strong></p>
 <p><strong>ops/s rpc bklog</strong></p>
@@ -721,10 +730,10 @@ CP
 <p><strong>5.091 82.983 16.300 0 (0.0%) 0.730 0.740</strong></p>
 <p><strong>write: ops/s kB/s kB/op retrans avg RTT (ms) avg exe (ms)</strong></p>
 <p><strong>4.714 77.251 16.389 0 (0.0%) 25.937 25.960</strong></p>
-<hr>
+<hr/>
 <p>I stopped here because I conceived no further insights could be made by having more runs. I am prepared to get corrected on that.</p>
-<h1>Conclusion</h1>
-<p>Some insights I got herefrom were as expected. Others quite surprised me. I did not expect that the delta sync after a cp would be only <strong>\~10-15%</strong> percent less performant than the sync after a preceding rsync approach. Moreover, I expected both tools to have hard times when it comes to migrating small files, but I honestly fathomed cp to outstrip rsync here clearly. It does not. cp shows to be ahead when it comes to larger files. But still, the difference is not astoundingly significant so to speak. That may deviate with real hugely whopping files, what I may look into deeper.  What I mainly take away for me is, that in the <strong>average real world case</strong> it does not really matter which tool to choose for migrating data when  performance aspects with respects to network based file systems play a role. Coreutils' cp does not necessarly outperform rsync over network based file systems.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>Some insights I got herefrom were as expected. Others quite surprised me. I did not expect that the delta sync after a cp would be only <strong>\~10-15%</strong> percent less performant than the sync after a preceding rsync approach. Moreover, I expected both tools to have hard times when it comes to migrating small files, but I honestly fathomed cp to outstrip rsync here clearly. It does not. cp shows to be ahead when it comes to larger files. But still, the difference is not astoundingly significant so to speak. That may deviate with real hugely whopping files, what I may look into deeper.&nbsp; What I mainly take away for me is, that in the <strong>average real world case</strong> it does not really matter which tool to choose for migrating data when&nbsp; performance aspects with respects to network based file systems play a role. Coreutils' cp does not necessarly outperform rsync over network based file systems.</p>
     </div><!-- /.entry-content -->
     <footer class="post-meta">
         <span class="meta-prep">Category:</span>
@@ -778,6 +787,122 @@ CP
                     Tagcloud
                 </div>
                 <div>
+                        <span><a href="https://cherusk.github.io/tag/operations.html">operations</a></span>
+                        <span><a href="https://cherusk.github.io/tag/interpretation.html">interpretation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmitting.html">transmitting</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp.html">tcp</a></span>
+                        <span><a href="https://cherusk.github.io/tag/wan-networks.html">wan networks</a></span>
+                        <span><a href="https://cherusk.github.io/tag/testbed.html">testbed</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cable-to-sky.html">cable to sky</a></span>
+                        <span><a href="https://cherusk.github.io/tag/network-stack.html">network stack</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tx.html">TX</a></span>
+                        <span><a href="https://cherusk.github.io/tag/hint.html">hint</a></span>
+                        <span><a href="https://cherusk.github.io/tag/skb.html">skb</a></span>
+                        <span><a href="https://cherusk.github.io/tag/hap.html">HAP</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flowing-engineering.html">flowing engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tc.html">tc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-rmem.html">tcp rmem</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ethtool.html">ethtool</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bandwith-product.html">bandwith product</a></span>
+                        <span><a href="https://cherusk.github.io/tag/python.html">python</a></span>
+                        <span><a href="https://cherusk.github.io/tag/driver-queues.html">driver queues</a></span>
+                        <span><a href="https://cherusk.github.io/tag/scaling.html">scaling</a></span>
+                        <span><a href="https://cherusk.github.io/tag/kvmqemu.html">KVM/Qemu</a></span>
+                        <span><a href="https://cherusk.github.io/tag/satellites.html">satellites</a></span>
+                        <span><a href="https://cherusk.github.io/tag/updown-link.html">up/down link</a></span>
+                        <span><a href="https://cherusk.github.io/tag/backbone-internet.html">backbone internet</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmission.html">transmission</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queues.html">queues</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airborne-networking.html">airborne networking</a></span>
+                        <span><a href="https://cherusk.github.io/tag/stack-config.html">stack config</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airborne-internet-backbone.html">airborne internet backbone</a></span>
+                        <span><a href="https://cherusk.github.io/tag/optics.html">optics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/kernel.html">kernel</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-wmem.html">tcp wmem</a></span>
+                        <span><a href="https://cherusk.github.io/tag/genbackupdata.html">genbackupdata</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queuing-discipline.html">queuing discipline</a></span>
+                        <span><a href="https://cherusk.github.io/tag/system-operations.html">system operations</a></span>
+                        <span><a href="https://cherusk.github.io/tag/rsync.html">rsync</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cp.html">cp</a></span>
+                        <span><a href="https://cherusk.github.io/tag/research.html">research</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flowing.html">flowing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-control.html">Traffic Control</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-flows.html">traffic flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transeive-window-scaling.html">transeive window scaling</a></span>
+                        <span><a href="https://cherusk.github.io/tag/congestion-control.html">congestion control</a></span>
+                        <span><a href="https://cherusk.github.io/tag/theory.html">theory</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queueing.html">queueing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcpip.html">tcp/ip</a></span>
+                        <span><a href="https://cherusk.github.io/tag/resource-usage.html">resource usage</a></span>
+                        <span><a href="https://cherusk.github.io/tag/sending.html">sending</a></span>
+                        <span><a href="https://cherusk.github.io/tag/socket.html">socket</a></span>
+                        <span><a href="https://cherusk.github.io/tag/radio-links.html">radio links</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmit-packet-steering.html">transmit packet steering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ibvirt.html">ibvirt</a></span>
+                        <span><a href="https://cherusk.github.io/tag/fso-links.html">FSO links</a></span>
+                        <span><a href="https://cherusk.github.io/tag/egress.html">egress</a></span>
+                        <span><a href="https://cherusk.github.io/tag/data-migration.html">data migration</a></span>
+                        <span><a href="https://cherusk.github.io/tag/linux.html">linux</a></span>
+                        <span><a href="https://cherusk.github.io/tag/user-land.html">user land</a></span>
+                        <span><a href="https://cherusk.github.io/tag/core-emulator.html">core emulator</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bottle-neck.html">bottle-neck</a></span>
+                        <span><a href="https://cherusk.github.io/tag/utility.html">utility</a></span>
+                        <span><a href="https://cherusk.github.io/tag/statistics.html">statistics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/networking.html">networking</a></span>
+                        <span><a href="https://cherusk.github.io/tag/perf.html">perf</a></span>
+                        <span><a href="https://cherusk.github.io/tag/json.html">json</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flow-grouping.html">flow grouping</a></span>
+                        <span><a href="https://cherusk.github.io/tag/msi.html">msi</a></span>
+                        <span><a href="https://cherusk.github.io/tag/xps.html">XPS</a></span>
+                        <span><a href="https://cherusk.github.io/tag/net-traversal.html">net traversal</a></span>
+                        <span><a href="https://cherusk.github.io/tag/napi.html">NAPI</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-flows.html">tcp flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/comparison.html">comparison</a></span>
+                        <span><a href="https://cherusk.github.io/tag/data-series.html">data series</a></span>
+                        <span><a href="https://cherusk.github.io/tag/explanation.html">explanation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/machine-readable.html">machine readable</a></span>
+                        <span><a href="https://cherusk.github.io/tag/linux-engineering.html">linux engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/wireless.html">wireless</a></span>
+                        <span><a href="https://cherusk.github.io/tag/suite.html">suite</a></span>
+                        <span><a href="https://cherusk.github.io/tag/c-isp.html">c-ISP</a></span>
+                        <span><a href="https://cherusk.github.io/tag/future-backbones.html">future backbones</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tuning.html">Tuning</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ss.html">ss</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cwnd.html">cwnd</a></span>
+                        <span><a href="https://cherusk.github.io/tag/speed-of-light.html">speed of light</a></span>
+                        <span><a href="https://cherusk.github.io/tag/stack-traversal.html">stack traversal</a></span>
+                        <span><a href="https://cherusk.github.io/tag/global-backbone-network.html">global backbone network</a></span>
+                        <span><a href="https://cherusk.github.io/tag/high-altitude-platform.html">high altitude platform</a></span>
+                        <span><a href="https://cherusk.github.io/tag/vs.html">vs</a></span>
+                        <span><a href="https://cherusk.github.io/tag/monitoring.html">Monitoring</a></span>
+                        <span><a href="https://cherusk.github.io/tag/laser-communication.html">laser communication</a></span>
+                        <span><a href="https://cherusk.github.io/tag/mechanism.html">mechanism</a></span>
+                        <span><a href="https://cherusk.github.io/tag/introspection.html">introspection</a></span>
+                        <span><a href="https://cherusk.github.io/tag/network-paths.html">network paths</a></span>
+                        <span><a href="https://cherusk.github.io/tag/performance.html">performance</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tool.html">tool</a></span>
+                        <span><a href="https://cherusk.github.io/tag/nfs.html">nfs</a></span>
+                        <span><a href="https://cherusk.github.io/tag/space-to-earth-link.html">space-to-earth-link</a></span>
+                        <span><a href="https://cherusk.github.io/tag/trouble-shooting.html">trouble shooting</a></span>
+                        <span><a href="https://cherusk.github.io/tag/virt-builder.html">virt-builder</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flent.html">flent</a></span>
+                        <span><a href="https://cherusk.github.io/tag/nic.html">nic</a></span>
+                        <span><a href="https://cherusk.github.io/tag/driver.html">driver</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flows.html">flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/automation.html">automation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/metrics.html">metrics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airship.html">airship</a></span>
+                        <span><a href="https://cherusk.github.io/tag/softirq.html">softirq</a></span>
+                        <span><a href="https://cherusk.github.io/tag/qdisc.html">qdisc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ebpf.html">ebpf</a></span>
+                        <span><a href="https://cherusk.github.io/tag/fibre-backbone.html">fibre backbone</a></span>
+                        <span><a href="https://cherusk.github.io/tag/analysis.html">analysis</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bcc.html">bcc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-volume.html">traffic volume</a></span>
+                        <span><a href="https://cherusk.github.io/tag/multi-queueing.html">multi queueing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/correlation.html">correlation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/internet-engineering.html">internet engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/atmospheric-mitigation-techniques.html">atmospheric mitigation techniques</a></span>
                 </div>
             </section>
 

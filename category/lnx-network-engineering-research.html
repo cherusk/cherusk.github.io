@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/style.css' type="text/css" media="all" />
     <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/highlight.css' type="text/css" media="all" />
-    <link href="https://cherusk.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="cherusk Tech Blog Full Atom Feed" />
     
 </head>
 
@@ -19,7 +18,7 @@
                 cherusk Tech Blog</h1>
         </div> <!-- /#logo-->
         <nav id="menu" class="main-nav"><ul class="menu">
-            <li  class="active"><a href="https://cherusk.github.io/pages/about.html">About</a></li>
+            <li  class="active"><a href="/pages/contact.html">Contact</a></li>
 
         </ul></nav><!-- /#menu -->
     </header>
@@ -45,10 +44,10 @@
 			<!-- COMMENTS -->
 		</div>
 	</header>
-	<div class="summary"><h1>Drive behind introspection</h1>
+	<div class="summary"><h1 id="drive behind introspection">Drive behind introspection</h1>
 <p>First, a researcher's curiosity what is the actual plasticity of this setting and further the urge for complementing rather incomplete, technical statements made around this topic findable everywhere.</p>
-<h1>Testbed outline</h1>
-<p>All virtual, KVM or LXC based,  with a  most recent fedora26 (<strong>kernel 4.11</strong>) as VMs that …</p></div>
+<h1 id="testbed outline">Testbed outline</h1>
+<p>All virtual, KVM or LXC based,&nbsp; with a&nbsp; most recent fedora26 (<strong>kernel 4.11</strong>) as VMs that …</p></div>
 	<footer>
 		<span class="post-lable">Category:</span>
 		<abbr class="category">
@@ -70,10 +69,11 @@
 			<!-- COMMENTS -->
 		</div>
 	</header>
-	<div class="summary"><h1><a href="https://github.com/cherusk/fleutan">Influence on GitHub</a></h1>
-<p><img alt="logo" class="alignnone size-full wp-image-2340" height="1183" src="https://cherusk.github.io/2017/08/logo.png" width="1400"></p>
-<h2>Notion</h2>
-<p>What is Fleutan? It's meant as a general tooling suite around all sort of flowing connected apparitions on unixoid systems (especially linux). Though, it's far from complete and should meanwhile rather been seen as a first illustrating radicales to show the desire for standardized open meta …</p></div>
+	<div class="summary"><!--[Influence on GitHub](https://github.com/cherusk/fleutan)-->
+<!--=========================================================-->
+<p><img alt="logo" class="alignnone size-full wp-image-2340" height="1183" src="https://cherusk.github.io/2017/08/logo.png" width="1400"/></p>
+<h2 id="notion">Notion</h2>
+<p>What is Fleutan? It's meant as a general tooling suite around all sort of flowing connected apparitions on unixoid systems (especially linux). Though, it's far from complete and should meanwhile rather been seen as a first illustrating radicales to show the desire for standardized open meta tooling suits around …</p></div>
 	<footer>
 		<span class="post-lable">Category:</span>
 		<abbr class="category">
@@ -95,32 +95,13 @@
 			<!-- COMMENTS -->
 		</div>
 	</header>
-	<div class="summary"><h1><a href="https://github.com/cherusk/kannjan/blob/master/linux_ns_egress">Edit on Github</a></h1>
-<ul>
-<li><a href="#TL;DR">TL;DR</a></li>
-<li><a href="#Approach">Approach</a></li>
-<li><a href="#traversal%20starting">TX skb traversal starting</a><ul>
-<li><a href="#Higher%20Layer">Higher Layer</a><ul>
-<li><a href="#TCP%20egress%20skeleton">TCP egress skeleton</a><ul>
-<li><a href="#">sending focal point: tcp_sendmsg</a></li>
-<li><a href="#tcp_write_xmit%20and%20tcp_transmit_skb">tcp_write_xmit and tcp_transmit_skb</a></li>
-</ul>
-</li>
-<li><a href="#IP%20code%20paths">IP code paths</a><ul>
-<li><a href="#ip_queue_xmit">ip_queue_xmit</a><ul>
-<li>coming data from TCP</li>
-<li>routing subsystem incurred costs</li>
-</ul>
-</li>
-<li><a href="#ip_local_out">ip_local_out</a><ul>
-<li><a href="#common%20tx%20sink%20for%20further%20protocols%20(like%20UDP)">common tx sink for further protocols (like UDP)</a></li>
-<li><a href="#__ip_local_out">__ip_local_out</a></li>
-<li>first netfilter hurdle</li>
-</ul>
-</li>
-<li><a href="#ip_output">ip_output</a><ul>
-<li>dst_output</li>
-<li>second …</li></ul></li></ul></li></ul></li></ul></li></ul></div>
+	<div class="summary"><!--more-->
+<h1 id="TL;DR">TL;DR</h1>
+<p>================</p>
+<p>With this blog article I'm seeking to complement the <a href="https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/#hardware-accelerated-receive-flow-steering-arfs">Linux RX Network Stack Monitoring and Tuning</a> with the TX concerns.</p>
+<h1 id="Approach">Approach</h1>
+<h1 id="=================">=================</h1>
+<p>We'll traverse the Linux Network Stack Transmission from Top to Bottom from userland via high layer kernel concepts like sockets down to the Network Device itself. As …</p></div>
 	<footer>
 		<span class="post-lable">Category:</span>
 		<abbr class="category">
@@ -160,6 +141,122 @@
                     Tagcloud
                 </div>
                 <div>
+                        <span><a href="https://cherusk.github.io/tag/operations.html">operations</a></span>
+                        <span><a href="https://cherusk.github.io/tag/interpretation.html">interpretation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmitting.html">transmitting</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp.html">tcp</a></span>
+                        <span><a href="https://cherusk.github.io/tag/wan-networks.html">wan networks</a></span>
+                        <span><a href="https://cherusk.github.io/tag/testbed.html">testbed</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cable-to-sky.html">cable to sky</a></span>
+                        <span><a href="https://cherusk.github.io/tag/network-stack.html">network stack</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tx.html">TX</a></span>
+                        <span><a href="https://cherusk.github.io/tag/hint.html">hint</a></span>
+                        <span><a href="https://cherusk.github.io/tag/skb.html">skb</a></span>
+                        <span><a href="https://cherusk.github.io/tag/hap.html">HAP</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flowing-engineering.html">flowing engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tc.html">tc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-rmem.html">tcp rmem</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ethtool.html">ethtool</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bandwith-product.html">bandwith product</a></span>
+                        <span><a href="https://cherusk.github.io/tag/python.html">python</a></span>
+                        <span><a href="https://cherusk.github.io/tag/driver-queues.html">driver queues</a></span>
+                        <span><a href="https://cherusk.github.io/tag/scaling.html">scaling</a></span>
+                        <span><a href="https://cherusk.github.io/tag/kvmqemu.html">KVM/Qemu</a></span>
+                        <span><a href="https://cherusk.github.io/tag/satellites.html">satellites</a></span>
+                        <span><a href="https://cherusk.github.io/tag/updown-link.html">up/down link</a></span>
+                        <span><a href="https://cherusk.github.io/tag/backbone-internet.html">backbone internet</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmission.html">transmission</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queues.html">queues</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airborne-networking.html">airborne networking</a></span>
+                        <span><a href="https://cherusk.github.io/tag/stack-config.html">stack config</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airborne-internet-backbone.html">airborne internet backbone</a></span>
+                        <span><a href="https://cherusk.github.io/tag/optics.html">optics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/kernel.html">kernel</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-wmem.html">tcp wmem</a></span>
+                        <span><a href="https://cherusk.github.io/tag/genbackupdata.html">genbackupdata</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queuing-discipline.html">queuing discipline</a></span>
+                        <span><a href="https://cherusk.github.io/tag/system-operations.html">system operations</a></span>
+                        <span><a href="https://cherusk.github.io/tag/rsync.html">rsync</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cp.html">cp</a></span>
+                        <span><a href="https://cherusk.github.io/tag/research.html">research</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flowing.html">flowing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-control.html">Traffic Control</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-flows.html">traffic flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transeive-window-scaling.html">transeive window scaling</a></span>
+                        <span><a href="https://cherusk.github.io/tag/congestion-control.html">congestion control</a></span>
+                        <span><a href="https://cherusk.github.io/tag/theory.html">theory</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queueing.html">queueing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcpip.html">tcp/ip</a></span>
+                        <span><a href="https://cherusk.github.io/tag/resource-usage.html">resource usage</a></span>
+                        <span><a href="https://cherusk.github.io/tag/sending.html">sending</a></span>
+                        <span><a href="https://cherusk.github.io/tag/socket.html">socket</a></span>
+                        <span><a href="https://cherusk.github.io/tag/radio-links.html">radio links</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmit-packet-steering.html">transmit packet steering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ibvirt.html">ibvirt</a></span>
+                        <span><a href="https://cherusk.github.io/tag/fso-links.html">FSO links</a></span>
+                        <span><a href="https://cherusk.github.io/tag/egress.html">egress</a></span>
+                        <span><a href="https://cherusk.github.io/tag/data-migration.html">data migration</a></span>
+                        <span><a href="https://cherusk.github.io/tag/linux.html">linux</a></span>
+                        <span><a href="https://cherusk.github.io/tag/user-land.html">user land</a></span>
+                        <span><a href="https://cherusk.github.io/tag/core-emulator.html">core emulator</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bottle-neck.html">bottle-neck</a></span>
+                        <span><a href="https://cherusk.github.io/tag/utility.html">utility</a></span>
+                        <span><a href="https://cherusk.github.io/tag/statistics.html">statistics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/networking.html">networking</a></span>
+                        <span><a href="https://cherusk.github.io/tag/perf.html">perf</a></span>
+                        <span><a href="https://cherusk.github.io/tag/json.html">json</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flow-grouping.html">flow grouping</a></span>
+                        <span><a href="https://cherusk.github.io/tag/msi.html">msi</a></span>
+                        <span><a href="https://cherusk.github.io/tag/xps.html">XPS</a></span>
+                        <span><a href="https://cherusk.github.io/tag/net-traversal.html">net traversal</a></span>
+                        <span><a href="https://cherusk.github.io/tag/napi.html">NAPI</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-flows.html">tcp flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/comparison.html">comparison</a></span>
+                        <span><a href="https://cherusk.github.io/tag/data-series.html">data series</a></span>
+                        <span><a href="https://cherusk.github.io/tag/explanation.html">explanation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/machine-readable.html">machine readable</a></span>
+                        <span><a href="https://cherusk.github.io/tag/linux-engineering.html">linux engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/wireless.html">wireless</a></span>
+                        <span><a href="https://cherusk.github.io/tag/suite.html">suite</a></span>
+                        <span><a href="https://cherusk.github.io/tag/c-isp.html">c-ISP</a></span>
+                        <span><a href="https://cherusk.github.io/tag/future-backbones.html">future backbones</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tuning.html">Tuning</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ss.html">ss</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cwnd.html">cwnd</a></span>
+                        <span><a href="https://cherusk.github.io/tag/speed-of-light.html">speed of light</a></span>
+                        <span><a href="https://cherusk.github.io/tag/stack-traversal.html">stack traversal</a></span>
+                        <span><a href="https://cherusk.github.io/tag/global-backbone-network.html">global backbone network</a></span>
+                        <span><a href="https://cherusk.github.io/tag/high-altitude-platform.html">high altitude platform</a></span>
+                        <span><a href="https://cherusk.github.io/tag/vs.html">vs</a></span>
+                        <span><a href="https://cherusk.github.io/tag/monitoring.html">Monitoring</a></span>
+                        <span><a href="https://cherusk.github.io/tag/laser-communication.html">laser communication</a></span>
+                        <span><a href="https://cherusk.github.io/tag/mechanism.html">mechanism</a></span>
+                        <span><a href="https://cherusk.github.io/tag/introspection.html">introspection</a></span>
+                        <span><a href="https://cherusk.github.io/tag/network-paths.html">network paths</a></span>
+                        <span><a href="https://cherusk.github.io/tag/performance.html">performance</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tool.html">tool</a></span>
+                        <span><a href="https://cherusk.github.io/tag/nfs.html">nfs</a></span>
+                        <span><a href="https://cherusk.github.io/tag/space-to-earth-link.html">space-to-earth-link</a></span>
+                        <span><a href="https://cherusk.github.io/tag/trouble-shooting.html">trouble shooting</a></span>
+                        <span><a href="https://cherusk.github.io/tag/virt-builder.html">virt-builder</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flent.html">flent</a></span>
+                        <span><a href="https://cherusk.github.io/tag/nic.html">nic</a></span>
+                        <span><a href="https://cherusk.github.io/tag/driver.html">driver</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flows.html">flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/automation.html">automation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/metrics.html">metrics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airship.html">airship</a></span>
+                        <span><a href="https://cherusk.github.io/tag/softirq.html">softirq</a></span>
+                        <span><a href="https://cherusk.github.io/tag/qdisc.html">qdisc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ebpf.html">ebpf</a></span>
+                        <span><a href="https://cherusk.github.io/tag/fibre-backbone.html">fibre backbone</a></span>
+                        <span><a href="https://cherusk.github.io/tag/analysis.html">analysis</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bcc.html">bcc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-volume.html">traffic volume</a></span>
+                        <span><a href="https://cherusk.github.io/tag/multi-queueing.html">multi queueing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/correlation.html">correlation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/internet-engineering.html">internet engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/atmospheric-mitigation-techniques.html">atmospheric mitigation techniques</a></span>
                 </div>
             </section>
 

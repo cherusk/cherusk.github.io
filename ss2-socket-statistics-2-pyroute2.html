@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/style.css' type="text/css" media="all" />
     <link rel="stylesheet" id="responsive-style-css"  href='/theme/css/highlight.css' type="text/css" media="all" />
-    <link href="https://cherusk.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="cherusk Tech Blog Full Atom Feed" />
     
 </head>
 
@@ -19,7 +18,7 @@
                 cherusk Tech Blog</h1>
         </div> <!-- /#logo-->
         <nav id="menu" class="main-nav"><ul class="menu">
-            <li  class="active"><a href="https://cherusk.github.io/pages/about.html">About</a></li>
+            <li  class="active"><a href="/pages/contact.html">Contact</a></li>
 
         </ul></nav><!-- /#menu -->
     </header>
@@ -27,7 +26,9 @@
         <section id="content" class="grid col-620" >
                 <section class="breadcrumb-list">
 <a href="https://cherusk.github.io">Blog</a> ›<a href="category/lnx-systems-engineering.html">LNX Systems Engineering</a> ›ss2 - Socket Statistics 2 (pyroute2)
+
                 </section>
+
 
 
 <section id="post" class="post hentry">
@@ -58,103 +59,113 @@
                 <a href="https://cherusk.github.io/tag/utility.html">utility</a>
         <!-- TOBE COMMENTS -->
     </div>
+
+
+
     </header>
+
+    <!-- TOC -->
+    <div class="toc col-lg-3 hidden-xs hidden-sm">
+        <b>Table of Content</b>
+        <div id="toc"><ul><li><a class="toc-href" href="#gist" title="Gist">Gist</a><ul><li><a class="toc-href" href="#how to attain ss2?" title="How to attain ss2?">How to attain ss2?</a></li><li><a class="toc-href" href="#example run" title="Example Run">Example Run</a></li></ul></li></ul></div>
+    </div>
+
     <div class="post-entry">
-        <h2>Gist</h2>
-<p>Disseminating a complementary and viably a more modern alternative to the established <strong>ss</strong> utility shipped with the well-known <strong>iproute</strong> package.</p>
-<h4>How to attain ss2?</h4>
+        <h1 id="gist">Gist</h1>
+<hr/>
+<p>Disseminating a complementary and viably a more modern alternative to the established <strong>ss</strong>&nbsp;utility shipped with the well-known <strong>iproute</strong> package.</p>
+<h3 id="how to attain ss2?">How to attain ss2?</h3>
 <p>It's part of the <a href="https://github.com/svinota/pyroute2">pyroute2 package install routines</a>, so please follow those upstream to allow me to reduce redundancy in this regard.</p>
-<h4>Example Run</h4>
+<h3 id="example run">Example Run</h3>
 <p><strong>ss2</strong> is offering, amongst many output formats, machine readable dumps of the kernel socket statistics. For it's renowned merits, json was chosen as the foremost default dumping format.</p>
 <p>Mission is to proffer to the user of it everything the kernel can actually export as context to sockets.</p>
 <p>Currently, as it is in its infancy, so not all aspects provided by ss have been implemented yet.</p>
-<blockquote>
-<p># ss2 --help</p>
-<p>usage: ss2 [-h] [-x] [-t] [-l] [-a] [-p] [-r]ss2 - socket statistics depictor meant as a complete and convenient surrogate
-   for iproute2/misc/ss2optional arguments:
-   -h, --help show this help message and exit
-   -x, --unix Display Unix domain sockets.
-   -t, --tcp Display TCP sockets.
-   -l, --listen Display listening sockets.
-   -a, --all Display all sockets.
-   -p, --process show socket holding context
-   -r, --resolve resolve host names in addition</p>
-</blockquote>
+<div class="highlight"><pre><span></span># <span class="nv">ss2</span> <span class="o">--</span><span class="nv">help</span>
+
+ <span class="nv">usage</span>: <span class="nv">ss2</span> [<span class="o">-</span><span class="nv">h</span>] [<span class="o">-</span><span class="nv">x</span>] [<span class="o">-</span><span class="nv">t</span>] [<span class="o">-</span><span class="nv">l</span>] [<span class="o">-</span><span class="nv">a</span>] [<span class="o">-</span><span class="nv">p</span>] [<span class="o">-</span><span class="nv">r</span>]<span class="nv">ss2</span> <span class="o">-</span> <span class="nv">socket</span> <span class="nv">statistics</span> <span class="nv">depictor</span> <span class="nv">meant</span> <span class="nv">as</span> <span class="nv">a</span> <span class="nv">complete</span> <span class="nv">and</span> <span class="nv">convenient</span> <span class="nv">surrogate</span> 
+ <span class="k">for</span> <span class="nv">iproute2</span><span class="o">/</span><span class="nv">misc</span><span class="o">/</span><span class="nv">ss2optional</span> <span class="nv">arguments</span>: 
+ <span class="o">-</span><span class="nv">h</span>, <span class="o">--</span><span class="nv">help</span> <span class="k">show</span> <span class="nv">this</span> <span class="nv">help</span> <span class="nv">message</span> <span class="nv">and</span> <span class="k">exit</span> 
+ <span class="o">-</span><span class="nv">x</span>, <span class="o">--</span><span class="nv">unix</span> <span class="nv">Display</span> <span class="nv">Unix</span> <span class="nv">domain</span> <span class="nv">sockets</span>. 
+ <span class="o">-</span><span class="nv">t</span>, <span class="o">--</span><span class="nv">tcp</span> <span class="nv">Display</span> <span class="nv">TCP</span> <span class="nv">sockets</span>. 
+ <span class="o">-</span><span class="nv">l</span>, <span class="o">--</span><span class="nv">listen</span> <span class="nv">Display</span> <span class="nv">listening</span> <span class="nv">sockets</span>. 
+ <span class="o">-</span><span class="nv">a</span>, <span class="o">--</span><span class="nv">all</span> <span class="nv">Display</span> <span class="nv">all</span> <span class="nv">sockets</span>. 
+ <span class="o">-</span><span class="nv">p</span>, <span class="o">--</span><span class="nv">process</span> <span class="k">show</span> <span class="nv">socket</span> <span class="nv">holding</span> <span class="nv">context</span> 
+ <span class="o">-</span><span class="nv">r</span>, <span class="o">--</span><span class="nv">resolve</span> <span class="nv">resolve</span> <span class="nv">host</span> <span class="nv">names</span> <span class="nv">in</span> <span class="nv">addition</span> 
+</pre></div>
 <p>On a recent kernel (4.17.19-200.fc28.x86_64), following schema could be expected for TCP flows:</p>
-<blockquote>
-<p># ss2 -t
-   {
-       "TCP": {
-           "flows": [
-               {
-                   "src": "10.0.2.15", 
-                   "src_port": 43332, 
-                   "retrans": 0, 
-                   "dst": "172.25.136.144", 
-                   "cong_algo": "cubic", 
-                   "dst_port": 22, 
-                   "meminfo": {
-                       "r": 0, 
-                       "t": 0, 
-                       "w": 0, 
-                       "f": 4096
-                   }, 
-                   "iface_idx": 0, 
-                   "inode": 45433, 
-                   "tcp_info": {
-                       "delivery_rate": 5615384, 
-                       "retrans": 0, 
-                       "data_segs_in": 19, 
-                       "rto": 201.0, 
-                       "segs_in": 35, 
-                       "rtt": 0.943, 
-                       "retransmits": 0, 
-                       "bytes_received": 5349, 
-                       "last_ack_sent": 0, 
-                       "rcv_space": 29200, 
-                       "rcv_mss": 1420, 
-                       "max_pacing_rate": 18446744073709551615, 
-                       "ca_state": 0, 
-                       "min_rtt": 260, 
-                       "segs_out": 26, 
-                       "advmss": 1460, 
-                       "state": "established", 
-                       "last_ack_recv": 113749, 
-                       "snd_wscale": 0, 
-                       "pmtu": 1500, 
-                       "busy_time": 8000, 
-                       "bytes_acked": 5630, 
-                       "rcv_ssthresh": 49800, 
-                       "total_retrans": 0, 
-                       "last_data_recv": 113749, 
-                       "unacked": 0, 
-                       "fackets": 0, 
-                       "sndbuf_limited": 0, 
-                       "sacked": 0, 
-                       "reordering": 3, 
-                       "pacing_rate": 30944495, 
-                       "rttvar": 0.859, 
-                       "snd_cwnd": 10, 
-                       "last_data_sent": 113995, 
-                       "null": 0, 
-                       "rcv_wscale": 0, 
-                       "probes": 0, 
-                       "notsent_bytes": 0, 
-                       "data_segs_out": 15, 
-                       "snd_ssthresh": null, 
-                       "lost": 0, 
-                       "ato": 40.0, 
-                       "rwnd_limited": 0, 
-                       "rcv_rtt": 0.0, 
-                       "delivery_rate_app_limited": 1, 
-                       "snd_mss": 1460, 
-                       "opts": []
-                   }
-               }
-           ]
-       }
-   }</p>
-</blockquote>
+<div class="highlight"><pre><span></span><span class="o">#</span><span class="err">&nbsp;</span><span class="n">ss2</span> <span class="o">-</span><span class="n">t</span>
+<span class="err">{</span>  
+    <span class="ss">"TCP"</span><span class="p">:</span> <span class="err">{</span>  
+        <span class="ss">"flows"</span><span class="p">:</span> <span class="p">[</span>  
+            <span class="err">{</span>  
+                <span class="ss">"src"</span><span class="p">:</span> <span class="ss">"10.0.2.15"</span><span class="p">,</span>  
+                <span class="ss">"src_port"</span><span class="p">:</span> <span class="mi">43332</span><span class="p">,</span>  
+                <span class="ss">"retrans"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                <span class="ss">"dst"</span><span class="p">:</span> <span class="ss">"172.25.136.144"</span><span class="p">,</span>  
+                <span class="ss">"cong_algo"</span><span class="p">:</span> <span class="ss">"cubic"</span><span class="p">,</span>  
+                <span class="ss">"dst_port"</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span>  
+                <span class="ss">"meminfo"</span><span class="p">:</span> <span class="err">{</span>  
+                    <span class="ss">"r"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"t"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"w"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"f"</span><span class="p">:</span> <span class="mi">4096</span>  
+                <span class="err">}</span><span class="p">,</span>  
+                <span class="ss">"iface_idx"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                <span class="ss">"inode"</span><span class="p">:</span> <span class="mi">45433</span><span class="p">,</span>  
+                <span class="ss">"tcp_info"</span><span class="p">:</span> <span class="err">{</span>  
+                    <span class="ss">"delivery_rate"</span><span class="p">:</span> <span class="mi">5615384</span><span class="p">,</span>  
+                    <span class="ss">"retrans"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"data_segs_in"</span><span class="p">:</span> <span class="mi">19</span><span class="p">,</span>  
+                    <span class="ss">"rto"</span><span class="p">:</span> <span class="mi">201</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"segs_in"</span><span class="p">:</span> <span class="mi">35</span><span class="p">,</span>  
+                    <span class="ss">"rtt"</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">943</span><span class="p">,</span>  
+                    <span class="ss">"retransmits"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"bytes_received"</span><span class="p">:</span> <span class="mi">5349</span><span class="p">,</span>  
+                    <span class="ss">"last_ack_sent"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"rcv_space"</span><span class="p">:</span> <span class="mi">29200</span><span class="p">,</span>  
+                    <span class="ss">"rcv_mss"</span><span class="p">:</span> <span class="mi">1420</span><span class="p">,</span>  
+                    <span class="ss">"max_pacing_rate"</span><span class="p">:</span> <span class="mi">18446744073709551615</span><span class="p">,</span>  
+                    <span class="ss">"ca_state"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"min_rtt"</span><span class="p">:</span> <span class="mi">260</span><span class="p">,</span>  
+                    <span class="ss">"segs_out"</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span>  
+                    <span class="ss">"advmss"</span><span class="p">:</span> <span class="mi">1460</span><span class="p">,</span>  
+                    <span class="ss">"state"</span><span class="p">:</span> <span class="ss">"established"</span><span class="p">,</span>  
+                    <span class="ss">"last_ack_recv"</span><span class="p">:</span> <span class="mi">113749</span><span class="p">,</span>  
+                    <span class="ss">"snd_wscale"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"pmtu"</span><span class="p">:</span> <span class="mi">1500</span><span class="p">,</span>  
+                    <span class="ss">"busy_time"</span><span class="p">:</span> <span class="mi">8000</span><span class="p">,</span>  
+                    <span class="ss">"bytes_acked"</span><span class="p">:</span> <span class="mi">5630</span><span class="p">,</span>  
+                    <span class="ss">"rcv_ssthresh"</span><span class="p">:</span> <span class="mi">49800</span><span class="p">,</span>  
+                    <span class="ss">"total_retrans"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"last_data_recv"</span><span class="p">:</span> <span class="mi">113749</span><span class="p">,</span>  
+                    <span class="ss">"unacked"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"fackets"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"sndbuf_limited"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"sacked"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"reordering"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>  
+                    <span class="ss">"pacing_rate"</span><span class="p">:</span> <span class="mi">30944495</span><span class="p">,</span>  
+                    <span class="ss">"rttvar"</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">859</span><span class="p">,</span>  
+                    <span class="ss">"snd_cwnd"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>  
+                    <span class="ss">"last_data_sent"</span><span class="p">:</span> <span class="mi">113995</span><span class="p">,</span>  
+                    <span class="ss">"null"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"rcv_wscale"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"probes"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"notsent_bytes"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"data_segs_out"</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>  
+                    <span class="ss">"snd_ssthresh"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>  
+                    <span class="ss">"lost"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"ato"</span><span class="p">:</span> <span class="mi">40</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"rwnd_limited"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"rcv_rtt"</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span>  
+                    <span class="ss">"delivery_rate_app_limited"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  
+                    <span class="ss">"snd_mss"</span><span class="p">:</span> <span class="mi">1460</span><span class="p">,</span>  
+                    <span class="ss">"opts"</span><span class="p">:</span> <span class="p">[]</span>  
+                <span class="err">}</span>  
+            <span class="err">}</span>  
+        <span class="p">]</span>  
+    <span class="err">}</span>  
+<span class="err">}</span>  
+</pre></div>
     </div><!-- /.entry-content -->
     <footer class="post-meta">
         <span class="meta-prep">Category:</span>
@@ -208,6 +219,122 @@
                     Tagcloud
                 </div>
                 <div>
+                        <span><a href="https://cherusk.github.io/tag/operations.html">operations</a></span>
+                        <span><a href="https://cherusk.github.io/tag/interpretation.html">interpretation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmitting.html">transmitting</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp.html">tcp</a></span>
+                        <span><a href="https://cherusk.github.io/tag/wan-networks.html">wan networks</a></span>
+                        <span><a href="https://cherusk.github.io/tag/testbed.html">testbed</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cable-to-sky.html">cable to sky</a></span>
+                        <span><a href="https://cherusk.github.io/tag/network-stack.html">network stack</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tx.html">TX</a></span>
+                        <span><a href="https://cherusk.github.io/tag/hint.html">hint</a></span>
+                        <span><a href="https://cherusk.github.io/tag/skb.html">skb</a></span>
+                        <span><a href="https://cherusk.github.io/tag/hap.html">HAP</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flowing-engineering.html">flowing engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tc.html">tc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-rmem.html">tcp rmem</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ethtool.html">ethtool</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bandwith-product.html">bandwith product</a></span>
+                        <span><a href="https://cherusk.github.io/tag/python.html">python</a></span>
+                        <span><a href="https://cherusk.github.io/tag/driver-queues.html">driver queues</a></span>
+                        <span><a href="https://cherusk.github.io/tag/scaling.html">scaling</a></span>
+                        <span><a href="https://cherusk.github.io/tag/kvmqemu.html">KVM/Qemu</a></span>
+                        <span><a href="https://cherusk.github.io/tag/satellites.html">satellites</a></span>
+                        <span><a href="https://cherusk.github.io/tag/updown-link.html">up/down link</a></span>
+                        <span><a href="https://cherusk.github.io/tag/backbone-internet.html">backbone internet</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmission.html">transmission</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queues.html">queues</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airborne-networking.html">airborne networking</a></span>
+                        <span><a href="https://cherusk.github.io/tag/stack-config.html">stack config</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airborne-internet-backbone.html">airborne internet backbone</a></span>
+                        <span><a href="https://cherusk.github.io/tag/optics.html">optics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/kernel.html">kernel</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-wmem.html">tcp wmem</a></span>
+                        <span><a href="https://cherusk.github.io/tag/genbackupdata.html">genbackupdata</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queuing-discipline.html">queuing discipline</a></span>
+                        <span><a href="https://cherusk.github.io/tag/system-operations.html">system operations</a></span>
+                        <span><a href="https://cherusk.github.io/tag/rsync.html">rsync</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cp.html">cp</a></span>
+                        <span><a href="https://cherusk.github.io/tag/research.html">research</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flowing.html">flowing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-control.html">Traffic Control</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-flows.html">traffic flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transeive-window-scaling.html">transeive window scaling</a></span>
+                        <span><a href="https://cherusk.github.io/tag/congestion-control.html">congestion control</a></span>
+                        <span><a href="https://cherusk.github.io/tag/theory.html">theory</a></span>
+                        <span><a href="https://cherusk.github.io/tag/queueing.html">queueing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcpip.html">tcp/ip</a></span>
+                        <span><a href="https://cherusk.github.io/tag/resource-usage.html">resource usage</a></span>
+                        <span><a href="https://cherusk.github.io/tag/sending.html">sending</a></span>
+                        <span><a href="https://cherusk.github.io/tag/socket.html">socket</a></span>
+                        <span><a href="https://cherusk.github.io/tag/radio-links.html">radio links</a></span>
+                        <span><a href="https://cherusk.github.io/tag/transmit-packet-steering.html">transmit packet steering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ibvirt.html">ibvirt</a></span>
+                        <span><a href="https://cherusk.github.io/tag/fso-links.html">FSO links</a></span>
+                        <span><a href="https://cherusk.github.io/tag/egress.html">egress</a></span>
+                        <span><a href="https://cherusk.github.io/tag/data-migration.html">data migration</a></span>
+                        <span><a href="https://cherusk.github.io/tag/linux.html">linux</a></span>
+                        <span><a href="https://cherusk.github.io/tag/user-land.html">user land</a></span>
+                        <span><a href="https://cherusk.github.io/tag/core-emulator.html">core emulator</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bottle-neck.html">bottle-neck</a></span>
+                        <span><a href="https://cherusk.github.io/tag/utility.html">utility</a></span>
+                        <span><a href="https://cherusk.github.io/tag/statistics.html">statistics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/networking.html">networking</a></span>
+                        <span><a href="https://cherusk.github.io/tag/perf.html">perf</a></span>
+                        <span><a href="https://cherusk.github.io/tag/json.html">json</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flow-grouping.html">flow grouping</a></span>
+                        <span><a href="https://cherusk.github.io/tag/msi.html">msi</a></span>
+                        <span><a href="https://cherusk.github.io/tag/xps.html">XPS</a></span>
+                        <span><a href="https://cherusk.github.io/tag/net-traversal.html">net traversal</a></span>
+                        <span><a href="https://cherusk.github.io/tag/napi.html">NAPI</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tcp-flows.html">tcp flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/comparison.html">comparison</a></span>
+                        <span><a href="https://cherusk.github.io/tag/data-series.html">data series</a></span>
+                        <span><a href="https://cherusk.github.io/tag/explanation.html">explanation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/machine-readable.html">machine readable</a></span>
+                        <span><a href="https://cherusk.github.io/tag/linux-engineering.html">linux engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/wireless.html">wireless</a></span>
+                        <span><a href="https://cherusk.github.io/tag/suite.html">suite</a></span>
+                        <span><a href="https://cherusk.github.io/tag/c-isp.html">c-ISP</a></span>
+                        <span><a href="https://cherusk.github.io/tag/future-backbones.html">future backbones</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tuning.html">Tuning</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ss.html">ss</a></span>
+                        <span><a href="https://cherusk.github.io/tag/cwnd.html">cwnd</a></span>
+                        <span><a href="https://cherusk.github.io/tag/speed-of-light.html">speed of light</a></span>
+                        <span><a href="https://cherusk.github.io/tag/stack-traversal.html">stack traversal</a></span>
+                        <span><a href="https://cherusk.github.io/tag/global-backbone-network.html">global backbone network</a></span>
+                        <span><a href="https://cherusk.github.io/tag/high-altitude-platform.html">high altitude platform</a></span>
+                        <span><a href="https://cherusk.github.io/tag/vs.html">vs</a></span>
+                        <span><a href="https://cherusk.github.io/tag/monitoring.html">Monitoring</a></span>
+                        <span><a href="https://cherusk.github.io/tag/laser-communication.html">laser communication</a></span>
+                        <span><a href="https://cherusk.github.io/tag/mechanism.html">mechanism</a></span>
+                        <span><a href="https://cherusk.github.io/tag/introspection.html">introspection</a></span>
+                        <span><a href="https://cherusk.github.io/tag/network-paths.html">network paths</a></span>
+                        <span><a href="https://cherusk.github.io/tag/performance.html">performance</a></span>
+                        <span><a href="https://cherusk.github.io/tag/tool.html">tool</a></span>
+                        <span><a href="https://cherusk.github.io/tag/nfs.html">nfs</a></span>
+                        <span><a href="https://cherusk.github.io/tag/space-to-earth-link.html">space-to-earth-link</a></span>
+                        <span><a href="https://cherusk.github.io/tag/trouble-shooting.html">trouble shooting</a></span>
+                        <span><a href="https://cherusk.github.io/tag/virt-builder.html">virt-builder</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flent.html">flent</a></span>
+                        <span><a href="https://cherusk.github.io/tag/nic.html">nic</a></span>
+                        <span><a href="https://cherusk.github.io/tag/driver.html">driver</a></span>
+                        <span><a href="https://cherusk.github.io/tag/flows.html">flows</a></span>
+                        <span><a href="https://cherusk.github.io/tag/automation.html">automation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/metrics.html">metrics</a></span>
+                        <span><a href="https://cherusk.github.io/tag/airship.html">airship</a></span>
+                        <span><a href="https://cherusk.github.io/tag/softirq.html">softirq</a></span>
+                        <span><a href="https://cherusk.github.io/tag/qdisc.html">qdisc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/ebpf.html">ebpf</a></span>
+                        <span><a href="https://cherusk.github.io/tag/fibre-backbone.html">fibre backbone</a></span>
+                        <span><a href="https://cherusk.github.io/tag/analysis.html">analysis</a></span>
+                        <span><a href="https://cherusk.github.io/tag/bcc.html">bcc</a></span>
+                        <span><a href="https://cherusk.github.io/tag/traffic-volume.html">traffic volume</a></span>
+                        <span><a href="https://cherusk.github.io/tag/multi-queueing.html">multi queueing</a></span>
+                        <span><a href="https://cherusk.github.io/tag/correlation.html">correlation</a></span>
+                        <span><a href="https://cherusk.github.io/tag/internet-engineering.html">internet engineering</a></span>
+                        <span><a href="https://cherusk.github.io/tag/atmospheric-mitigation-techniques.html">atmospheric mitigation techniques</a></span>
                 </div>
             </section>
 

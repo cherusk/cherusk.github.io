@@ -63,6 +63,8 @@ body {
 
 ol, ul {
 	list-style: none;
+    padding-left: 1em;
+    margin-left: 1em;
 }
 
 blockquote, q {
@@ -1075,16 +1077,16 @@ table {
 -------------------------------------------------------------- */
 ul {
 	list-style-type: disc;
-    margin: 0;
-    padding: 0;
+    padding-left: 1em;
+    margin-left: 1em;
 }
 
 ol {
 	line-height: 22px;
 	list-style-position: outside;
 	list-style-type: decimal;
-    margin: 0;
-    padding: 0;
+    padding-left: 1em;
+    margin-left: 1em;
 }
 
 dt {
@@ -1499,7 +1501,8 @@ li.posts {
 	margin-right: 1.5em;
 }
 #content ul {
-    padding-left: 0;
+    padding-left: 1em;
+    margin-left: 1em;
 }
 
 .post-entry h1, .summary h1{
@@ -1759,6 +1762,20 @@ li.posts {
 
 .top-menu li a:hover {
 	color: #333;
+}
+
+/* =TOC (Primary)
+-------------------------------------------------------------- */
+
+.toc ul {
+	padding-left: 10px;
+    margin-left: 10px;
+	padding: 10px;
+    margin: 2px
+}
+
+.toc div {
+    background-color: #f5f5f0;
 }
 
 /* =Header Menu (Primary)
